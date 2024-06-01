@@ -1,6 +1,6 @@
-project='[repo-name]'
-title='[module-name] docs'
-description='[short-description]'
+project='terminal.lua'
+title='terminal docs'
+description='Cross platform terminal library for Lua (Windows/Unix/Mac)'
 
 format='markdown'
 use_markdown_titles = true
