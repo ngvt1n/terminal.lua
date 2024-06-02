@@ -25,6 +25,7 @@ description = {
 
 dependencies = {
   "lua >= 5.1, < 5.5",
+  "luasystem > 0.3",
 }
 
 build = {
@@ -32,12 +33,6 @@ build = {
 
   modules = {
     ["terminal.init"] = "src/terminal/init.lua",
-  },
-
-  install = {
-    bin = {
-      ["terminal"] = "bin/terminal.lua",
-    }
   },
 
   copy_directories = {
