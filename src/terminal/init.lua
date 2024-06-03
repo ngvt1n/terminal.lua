@@ -566,6 +566,30 @@ function M.clear_end()
   return true
 end
 
+--- Creates an ansi sequence to clear a box from the cursor position (top-left) without writing it to the terminal.
+-- Cursor will return to the original position.
+-- @tparam number height the height of the box in rows
+-- @tparam number width the width of the box in columns
+-- @treturn string ansi sequence to write to the terminal
+-- @within clearing
+function M.clear_boxs(height, width)
+  local line = (" "):rep(width) .. M.cursor_lefts(width)
+  local line_next = line .. M.cursor_downs()
+  return line_next:rep(height - 1) .. line .. M.cursor_ups(height - 1)
+end
+
+--- Clears a box from the cursor position (top-left) and writes it to the terminal (+flush).
+-- Cursor will return to the original position.
+-- @tparam number height the height of the box in rows
+-- @tparam number width the width of the box in columns
+-- @treturn string ansi sequence to write to the terminal
+-- @within clearing
+function M.clear_box(height, width)
+  t:write(M.clear_boxs(height, width))
+  t:flush()
+  return true
+end
+
 --=============================================================================
 -- scrolling
 --=============================================================================
@@ -1148,13 +1172,21 @@ end
 --- Creates a sequence to draw a horizontal line with a title centered in it without writing it to the terminal.
 -- Line is drawn left to right. If the width is too small for the title, the title is truncated with "trailing `"..."`.
 -- If less than 4 characters are available for the title, the title is omitted alltogether.
--- @tparam string title the title to draw
 -- @tparam number width the total width of the line in columns
+-- @tparam[opt=""] string title the title to draw (if empty or nil, only the line is drawn)
 -- @tparam[opt="─"] string char the line-character to use
 -- @tparam[opt=""] string pre the prefix for the title, eg. "┤ "
 -- @tparam[opt=""] string post the postfix for the title, eg. " ├"
+-- @treturn string ansi sequence to write to the terminal
 -- @within lines
-function M.line_titles(title, width, char, pre, post)
+function M.line_titles(width, title, char, pre, post)
+
+  -- TODO: strip any ansi sequences from the title before determining length
+  -- such that titles can have multiple colors etc. what if we truncate????
+
+  if title = nil or title == "" then
+    return M.line_horizontals(width, char)
+  end
   pre = pre or ""
   post = post or ""
   local pre_w = sys.utf8swidth(pre)
@@ -1189,6 +1221,7 @@ end
 -- @tparam[opt="─"] string char the line-character to use
 -- @tparam[opt=""] string pre the prefix for the title, eg. "┤ "
 -- @tparam[opt=""] string post the postfix for the title, eg. " ├"
+-- @return true
 -- @within lines
 function M.line_title(title, width, char, pre, post)
   t:write(M.line_titles(title, width, char, pre, post))
@@ -1196,10 +1229,94 @@ function M.line_title(title, width, char, pre, post)
   return true
 end
 
+local box_fmt = {
+  single = {
+    h = "─",
+    v = "│",
+    tl = "┌",
+    tr = "┐",
+    bl = "└",
+    br = "┘",
+    pre = "┤",
+    post = "├",
+  },
+  double = {
+    h = "═",
+    v = "║",
+    tl = "╔",
+    tr = "╗",
+    bl = "╚",
+    br = "╝",
+    pre = "╢",
+    post = "╟",
+  },
+}
 
 --- Creates a sequence to draw a box, without writing it to the terminal.
-function M.boxs(row, col, height, width, fmt, clear, title, title_pre, title_post)
+-- The box is draw starting from the top-left corner at the current cursor position,
+-- after drawing the cursor will be in the same position.
+-- @tparam number row the row to start the box at (top left)
+-- @tparam number col the column to start the box at (top left)
+-- @tparam number height the height of the box in rows
+-- @tparam number width the width of the box in columns
+-- @tparam[opt="single"] table format the format for the box, with keys:
+-- @tparam[opt=" "] string format.h the horizontal line character
+-- @tparam[opt=""] string format.v the vertical line character
+-- @tparam[opt=""] string format.tl the top left corner character
+-- @tparam[opt=""] string format.tr the top right corner character
+-- @tparam[opt=""] string format.bl the bottom left corner character
+-- @tparam[opt=""] string format.br the bottom right corner character
+-- @tparam[opt=""] string format.pre the title-prefix character(s)
+-- @tparam[opt=""] string format.post the left-postfix character(s)
+-- @tparam bool clear whether to clear the box contents
+-- @tparam[opt=""] string title the title to draw
+-- @treturn string ansi sequence to write to the terminal
+-- @within lines
+function M.boxs(row, col, height, width, format, clear, title)
+  format = format or box_fmt.single
+  local v_w = sys.utf8swidth(format.v or "")
+  local tl_w = sys.utf8swidth(format.tl or "")
+  local tr_w = sys.utf8swidth(format.tr or "")
+  local bl_w = sys.utf8swidth(format.bl or "")
+  local br_w = sys.utf8swidth(format.br or "")
+  local v_line = M.line_verticals(height - 2, format.v)
+  local r = {
+    -- draw top
+    format.tl or "",
+    M.line_titles(width - tl_w - tr_w, title, format.h or " ", format.pre or "", format.post or ""),
+    format.tr or "",
+    -- position to draw right, and draw it
+    M.cursor_downs(1), M.cursor_lefts(v_w), v_line,
+    -- position back to top left, and draw left
+    M.cursor_lefts(width + 1), M.cursor_ups(height - 1), v_line,
+    -- draw bottom
+    format.bl or "",
+    M.line_horizontals(width - bl_w - br_w, format.h or " "),
+    format.br or "",
+    -- return to top left
+    M.cursor_ups(height - 1), M.cursor_lefts(width),
+  }
+  if clear then
+    fix this
+  end
+  return table.concat(r)
 end
+
+--- Draws a box and writes it to the terminal (+flush).
+-- @tparam number row the row to start the box at (top left)
+-- @tparam number col the column to start the box at (top left)
+-- @tparam number height the height of the box in rows
+-- @tparam number width the width of the box in columns
+-- @tparam table format the format for the box, see `boxs` for details.
+-- @tparam[opt=""] string title the title to draw
+-- @return true
+-- @within lines
+function M.box(row, col, height, width, format, title)
+  t:write(M.boxs(row, col, height, width, format, title))
+  t:flush()
+  return true
+end
+
 
 --=============================================================================
 -- terminal initialization and exit
