@@ -26,6 +26,30 @@ local t -- the terminal/stream to operate on, default io.stdout
 
 
 --=============================================================================
+-- Stream support
+--=============================================================================
+
+--- Stream support.
+-- Shortcuts to the stream used.
+-- @section stream
+
+--- Writes to the stream.
+-- @param ... the values to write
+-- @return the return value of the stream's `write` function
+-- @within stream
+function M.write(...)
+  return t:write(...)
+end
+
+--- Flushes the stream.
+-- @return the return value of the stream's `flush` function
+-- @within stream
+function M.flush()
+  return t:flush()
+end
+
+
+--=============================================================================
 -- cursor shapes
 --=============================================================================
 
@@ -38,13 +62,13 @@ local t -- the terminal/stream to operate on, default io.stdout
 local shape_reset = "\27[0 q"
 
 local shapes = setmetatable({
-  block_blink = "\27[1 q",
-  block = "\27[2 q",
+  block_blink     = "\27[1 q",
+  block           = "\27[2 q",
   underline_blink = "\27[3 q",
-  underline = "\27[4 q",
-  bar_blink = "\27[5 q",
-  bar = "\27[6 q",
-  hide = "\27[8 q",
+  underline       = "\27[4 q",
+  bar_blink       = "\27[5 q",
+  bar             = "\27[6 q",
+  hide            = "\27[8 q",
 }, {
   __index = function(t, k)
     error("invalid shape: "..tostring(k), 2)
@@ -56,10 +80,11 @@ local _shapestack = {
 }
 
 
---- Returns the ansi sequence for a cursor shape.
+--- Returns the ansi sequence for a cursor shape without writing it to the terminal.
 -- @tparam string shape the shape to get, one of the keys `"block"`,
 -- `"block_blink"`, `"underline"`, `"underline_blink"`, `"bar"`, `"bar_blink"`, `"hide"`
 -- @treturn string ansi sequence to write to the terminal
+-- @within cursor_shapes
 function M.shapes(shape)
   return shapes[shape]
 end
@@ -68,6 +93,7 @@ end
 -- @tparam string shape the shape to set, one of the keys `"block"`,
 -- `"block_blink"`, `"underline"`, `"underline_blink"`, `"bar"`, `"bar_blink"`, `"hide"`
 -- @return true
+-- @within cursor_shapes
 function M.shape(shape)
   t:write(shapes[shape])
   t:flush()
@@ -204,7 +230,7 @@ function M.cursor_get()
 
   -- read response
   while true do
-    local seq, typ, part = old_readansi(0)
+    local seq, typ, part = old_readansi(1)
     if seq == nil and typ == "timeout" then
       error("no response from terminal, this is unexpected")
     end
@@ -262,7 +288,7 @@ end
 -- @treturn string ansi sequence to write to the terminal
 -- @within cursor_position
 function M.cursor_sets(row, column)
-  return "\27["..tostring(row)";"..tostring(column).."H"
+  return "\27[" .. tostring(row) .. ";" .. tostring(column) .. "H"
 end
 
 --- Sets the cursor position and writes it to the terminal (+flush), without pushing onto the stack.
@@ -462,6 +488,25 @@ function M.cursor_horizontal(n)
   return true
 end
 
+--- Creates an ansi sequence to move the cursor horizontal and vertical without writing it to the terminal.
+-- @tparam[opt=0] number rows number of rows to move (negative for up, positive for down)
+-- @tparam[opt=0] number columns number of columns to move (negative for left, positive for right)
+-- @treturn string ansi sequence to write to the terminal
+-- @within cursor_moving
+function M.cursor_moves(rows, columns)
+  return M.cursor_verticals(rows or 0) .. M.cursor_horizontals(columns or 0)
+end
+
+--- Moves the cursor horizontal and vertical and writes it to the terminal (+flush).
+-- @tparam[opt=0] number rows number of rows to move (negative for up, positive for down)
+-- @tparam[opt=0] number columns number of columns to move (negative for left, positive for right)
+-- @return true
+-- @within cursor_moving
+function M.cursor_move(rows, columns)
+  t:write(M.cursor_moves(rows, columns))
+  t:flush()
+  return true
+end
 
 --=============================================================================
 -- clearing
@@ -486,14 +531,14 @@ function M.clear()
   return true
 end
 
---- Creates an ansi sequence to clear the screen from the cursor position to the top without writing it to the terminal.
+--- Creates an ansi sequence to clear the screen from the cursor position to the left and top without writing it to the terminal.
 -- @treturn string ansi sequence to write to the terminal
 -- @within clearing
 function M.clear_tops()
   return "\27[1J"
 end
 
---- Clears the screen from the cursor position to the top and writes it to the terminal (+flush).
+--- Clears the screen from the cursor position to the left and top and writes it to the terminal (+flush).
 -- @return true
 -- @within clearing
 function M.clear_top()
@@ -502,14 +547,14 @@ function M.clear_top()
   return true
 end
 
---- Creates an ansi sequence to clear the screen from the cursor position to the bottom without writing it to the terminal.
+--- Creates an ansi sequence to clear the screen from the cursor position to the right and bottom without writing it to the terminal.
 -- @treturn string ansi sequence to write to the terminal
 -- @within clearing
 function M.clear_bottoms()
   return "\27[0J"
 end
 
---- Clears the screen from the cursor position to the bottom and writes it to the terminal (+flush).
+--- Clears the screen from the cursor position to the right and bottom and writes it to the terminal (+flush).
 -- @return true
 -- @within clearing
 function M.clear_bottom()
@@ -1149,12 +1194,14 @@ end
 -- Line is drawn top to bottom. Cursor is left to the right of the last character (so not below it).
 -- @tparam number n number of rows/lines to draw
 -- @tparam[opt="│"] string char the character to draw
+-- @tparam[opt] boolean lastcolumn whether to draw the last column of the terminal
 -- @treturn string ansi sequence to write to the terminal
 -- @within lines
-function M.line_verticals(n, char)
+function M.line_verticals(n, char, lastcolumn)
   char = char or "│"
+  lastcolumn = lastcolumn and 1 or 0
   local w = sys.utf8cwidth(char)
-  return (char .. M.cursor_downs() .. M.cursor_lefts(w)):rep(n-1) .. char
+  return (char .. M.cursor_lefts(w-lastcolumn*2) .. M.cursor_downs(1)):rep(n-1) .. char
 end
 
 --- Draws a vertical line and writes it to the terminal (+flush).
@@ -1184,7 +1231,7 @@ function M.line_titles(width, title, char, pre, post)
   -- TODO: strip any ansi sequences from the title before determining length
   -- such that titles can have multiple colors etc. what if we truncate????
 
-  if title = nil or title == "" then
+  if title == nil or title == "" then
     return M.line_horizontals(width, char)
   end
   pre = pre or ""
@@ -1195,8 +1242,8 @@ function M.line_titles(width, title, char, pre, post)
   local w_for_title = width - pre_w - post_w
   if w_for_title > title_w then
     -- enough space for title
-    local l1 = M.line_horizontals(math.floor((width - w_for_title) / 2), char)
-    return  l1 .. pre .. title .. post .. M.line_horizontals(width - w_for_title - sys.utf8swidth(l1), char)
+    local p1 = M.line_horizontals(math.floor((w_for_title - title_w) / 2), char) .. pre .. title .. post
+    return  p1 .. M.line_horizontals(width - sys.utf8swidth(p1), char)
   elseif w_for_title < 4 then
     -- too little space for title, omit it alltogether
     return M.line_horizontals(width, char)
@@ -1207,7 +1254,7 @@ function M.line_titles(width, title, char, pre, post)
     w_for_title = w_for_title - 3 -- for "..."
     while title_w == nil or title_w > w_for_title do
       title = title:sub(1, -2) -- drop last byte
-      w_for_title = sys.utf8swidth(title)
+      title_w = sys.utf8swidth(title)
     end
     return pre .. title .. "..." .. post
   end
@@ -1229,7 +1276,13 @@ function M.line_title(title, width, char, pre, post)
   return true
 end
 
-local box_fmt = {
+--- Table with pre-defined box formats.
+-- @table box_fmt
+-- @field single Single line box format
+-- @field double Double line box format
+-- @field copy Function to copy a box format, see `box_fmt.copy` for details
+-- @within lines
+M.box_fmt = setmetatable({
   single = {
     h = "─",
     v = "│",
@@ -1247,16 +1300,39 @@ local box_fmt = {
     tr = "╗",
     bl = "╚",
     br = "╝",
-    pre = "╢",
-    post = "╟",
+    pre = "╡",
+    post = "╞",
   },
-}
+  --- Copy a box format.
+  -- @function box_fmt.copy
+  -- @tparam table default the default format to copy
+  -- @treturn table a copy of the default format provided
+  -- @within lines
+  -- @usage -- create new format with spaces around the title
+  -- local fmt = t.box_fmt.copy(t.box_fmt.single)
+  -- fmt.pre = fmt.pre .. " "
+  -- fmt.post = " " .. fmt.post
+  copy = function(default)
+    return {
+      h = default.h,
+      v = default.v,
+      tl = default.tl,
+      tr = default.tr,
+      bl = default.bl,
+      br = default.br,
+      pre = default.pre,
+      post = default.post,
+    }
+  end,
+}, {
+  __index = function(_, k)
+    error("invalid box format: " .. tostring(k))
+  end,
+})
 
 --- Creates a sequence to draw a box, without writing it to the terminal.
--- The box is draw starting from the top-left corner at the current cursor position,
+-- The box is drawn starting from the top-left corner at the current cursor position,
 -- after drawing the cursor will be in the same position.
--- @tparam number row the row to start the box at (top left)
--- @tparam number col the column to start the box at (top left)
 -- @tparam number height the height of the box in rows
 -- @tparam number width the width of the box in columns
 -- @tparam[opt="single"] table format the format for the box, with keys:
@@ -1270,49 +1346,62 @@ local box_fmt = {
 -- @tparam[opt=""] string format.post the left-postfix character(s)
 -- @tparam bool clear whether to clear the box contents
 -- @tparam[opt=""] string title the title to draw
+-- @tparam[opt] boolean lastcolumn whether to draw the last column of the terminal
 -- @treturn string ansi sequence to write to the terminal
 -- @within lines
-function M.boxs(row, col, height, width, format, clear, title)
-  format = format or box_fmt.single
+function M.boxs(height, width, format, clear, title, lastcolumn)
+  format = format or M.box_fmt.single
   local v_w = sys.utf8swidth(format.v or "")
   local tl_w = sys.utf8swidth(format.tl or "")
   local tr_w = sys.utf8swidth(format.tr or "")
   local bl_w = sys.utf8swidth(format.bl or "")
   local br_w = sys.utf8swidth(format.br or "")
-  local v_line = M.line_verticals(height - 2, format.v)
+  local v_line_l = M.line_verticals(height - 2, format.v)
+  local v_line_r = v_line_l
+  if lastcolumn then
+    v_line_r = M.line_verticals(height - 2, format.v, lastcolumn)
+  end
+  lastcolumn = lastcolumn and 1 or 0
+
   local r = {
     -- draw top
     format.tl or "",
     M.line_titles(width - tl_w - tr_w, title, format.h or " ", format.pre or "", format.post or ""),
     format.tr or "",
     -- position to draw right, and draw it
-    M.cursor_downs(1), M.cursor_lefts(v_w), v_line,
+    M.cursor_moves(1, -v_w + lastcolumn),
+    v_line_r,
     -- position back to top left, and draw left
-    M.cursor_lefts(width + 1), M.cursor_ups(height - 1), v_line,
+    M.cursor_moves(-height + 3, -width + lastcolumn),
+    v_line_l,
     -- draw bottom
+    M.cursor_moves(1, -1),
     format.bl or "",
     M.line_horizontals(width - bl_w - br_w, format.h or " "),
     format.br or "",
     -- return to top left
-    M.cursor_ups(height - 1), M.cursor_lefts(width),
+    M.cursor_moves(-height + 1, -width + lastcolumn),
   }
   if clear then
-    fix this
+    local l = #r
+    r[l+1] = M.cursor_moves(1, v_w)
+    r[l+2] = M.clear_boxs(height - 2, width - 2 * v_w)
+    r[l+3] = M.cursor_moves(-1, -v_w)
   end
   return table.concat(r)
 end
 
 --- Draws a box and writes it to the terminal (+flush).
--- @tparam number row the row to start the box at (top left)
--- @tparam number col the column to start the box at (top left)
 -- @tparam number height the height of the box in rows
 -- @tparam number width the width of the box in columns
 -- @tparam table format the format for the box, see `boxs` for details.
+-- @tparam bool clear whether to clear the box contents
 -- @tparam[opt=""] string title the title to draw
+-- @tparam[opt] boolean lastcolumn whether to draw the last column of the terminal
 -- @return true
 -- @within lines
-function M.box(row, col, height, width, format, title)
-  t:write(M.boxs(row, col, height, width, format, title))
+function M.box(height, width, format, clear, title, lastcolumn)
+  t:write(M.boxs(height, width, format, clear, title, lastcolumn))
   t:flush()
   return true
 end
@@ -1328,26 +1417,27 @@ end
 do
   local termbackup
   local reset = "\27[0m"
-  local backupterminal = "\27[s"
-  local restoreterminal = "\27[u"
+  local savescreen = "\27[?47h"
+  local restorescreen = "\27[?47l"
 
 
   --- Initializes the terminal for use.
   -- Makes a backup of the current terminal settings.
   -- Sets input to non-blocking, disables canonical mode and echo, and enables ANSI processing.
-  -- @tparam[opt=false] boolean displaybackup if true, the current terminal display is also backed up.
+  -- @tparam[opt=false] boolean displaybackup if true, the current terminal display is also
+  -- backed up (by switching to the alternate screen buffer).
   -- @tparam[opt=io.stdout] filehandle filehandle the stream to use for output
   -- @return true
   -- @within initialization
   function M.initialize(displaybackup, filehandle)
     filehandle = filehandle or io.stdout
-    assert(io.type(filehandle) ~= 'file', "invalid file handle")
+    assert(io.type(filehandle) == 'file', "invalid file handle")
     t = filehandle
 
     termbackup = sys.termbackup()
-    termbackup.displaybackup = displaybackup
     if displaybackup then
-      t:write(backupterminal)
+      t:write(savescreen)
+      termbackup.displaybackup = true
     end
 
     -- set Windows output to UTF-8
@@ -1370,13 +1460,14 @@ do
     return true
   end
 
-  --- Exits the terminal, restoring the terminal settings.
+  --- Shuts down the terminal, restoring the terminal settings.
   -- @return true
   -- @within initialization
-function M.exit()
+function M.shutdown()
     assert(termbackup, "terminal not initialized")
     if termbackup.displaybackup then
-      t:write(restoreterminal)
+      t:write(restorescreen)
+      t:flush()
     end
     t:write(reset)
     t:flush()
