@@ -53,10 +53,34 @@ end
 -- cursor shapes
 --=============================================================================
 
---- Cursor shapes.
+--- Cursor shapes and visibility.
 -- Managing the shape and visibility of the cursor. These functions just generate
 -- required ansi sequences, without any stack operations.
 -- @section cursor_shapes
+
+
+local cursor_hide = "\27[?25l"
+local cursor_show = "\27[?25h"
+
+
+--- Returns the ansi sequence to show/hide the cursor without writing it to the terminal.
+-- @tparam boolean visible true to show, false to hide
+-- @treturn string ansi sequence to write to the terminal
+-- @within cursor_shapes
+function M.visibles(visible)
+  return visible and cursor_show or cursor_hide
+end
+
+--- Shows or hides the cursor and writes it to the terminal (+flush).
+-- @tparam boolean visible true to show, false to hide
+-- @return true
+-- @within cursor_shapes
+function M.visible(visible)
+  t:write(M.visibles(visible))
+  t:flush()
+  return true
+end
+
 
 
 local shape_reset = "\27[0 q"
@@ -68,21 +92,16 @@ local shapes = setmetatable({
   underline       = "\27[4 q",
   bar_blink       = "\27[5 q",
   bar             = "\27[6 q",
-  hide            = "\27[8 q",
 }, {
   __index = function(t, k)
     error("invalid shape: "..tostring(k), 2)
   end
 })
 
-local _shapestack = {
-  shape_reset
-}
-
 
 --- Returns the ansi sequence for a cursor shape without writing it to the terminal.
 -- @tparam string shape the shape to get, one of the keys `"block"`,
--- `"block_blink"`, `"underline"`, `"underline_blink"`, `"bar"`, `"bar_blink"`, `"hide"`
+-- `"block_blink"`, `"underline"`, `"underline_blink"`, `"bar"`, `"bar_blink"`
 -- @treturn string ansi sequence to write to the terminal
 -- @within cursor_shapes
 function M.shapes(shape)
@@ -91,7 +110,7 @@ end
 
 --- Sets the cursor shape and writes it to the terminal (+flush).
 -- @tparam string shape the shape to set, one of the keys `"block"`,
--- `"block_blink"`, `"underline"`, `"underline_blink"`, `"bar"`, `"bar_blink"`, `"hide"`
+-- `"block_blink"`, `"underline"`, `"underline_blink"`, `"bar"`, `"bar_blink"`
 -- @return true
 -- @within cursor_shapes
 function M.shape(shape)
@@ -103,10 +122,78 @@ end
 --=============================================================================
 --- Cursor shape stack.
 -- Managing the shape and visibility of the cursor based on a stack. Since the
--- current shape cannot be requested, using a stack allows the user to revert to
--- a previous state since the stack keeps track of that.
+-- current shape cannot be requested, using a stacks allows the user to revert to
+-- a previous state since the stacks keeps track of that.
 -- It does however require the user to use balanced operations; `push`/`pop`.
 -- @section cursor_shape_stack
+
+local _visible_stack = {
+  true
+}
+
+--- Returns the ansi sequence to show/hide the cursor at the top of the stack without writing it to the terminal.
+-- @treturn string ansi sequence to write to the terminal
+-- @within cursor_shape_stack
+function M.visible_applys()
+  return M.visibles(_visible_stack[#_visible_stack])
+end
+
+--- Returns the ansi sequence to show/hide the cursor at the top of the stack, and writes it to the terminal (+flush).
+-- @return true
+-- @within cursor_shape_stack
+function M.visible_apply()
+  t:write(M.visible_applys())
+  t:flush()
+  return true
+end
+
+--- Pushes a cursor visibility onto the stack (and returns it), without writing it to the terminal.
+-- @tparam boolean visible true to show, false to hide
+-- @treturn string ansi sequence to write to the terminal
+-- @within cursor_shape_stack
+function M.visible_pushs(visible)
+  _visible_stack[#_visible_stack + 1] = not not visible
+  return M.visible_applys()
+end
+
+--- Pushes a cursor visibility onto the stack, and writes it to the terminal (+flush).
+-- @tparam boolean visible true to show, false to hide
+-- @return true
+-- @within cursor_shape_stack
+function M.visible_push(visible)
+  t:write(M.visible_pushs(visible))
+  t:flush()
+  return true
+end
+
+--- Pops `n` cursor visibility(ies) off the stack (and returns the last one), without writing it to the terminal.
+-- @tparam[opt=1] number n number of visibilities to pop
+-- @treturn string ansi sequence to write to the terminal
+-- @within cursor_shape_stack
+function M.visible_pops(n)
+  local new_last = math.max(#_visible_stack - (n or 1), 1)
+  for i = new_last + 1, #_visible_stack do
+    _visible_stack[i] = nil
+  end
+  return M.visible_applys()
+end
+
+--- Pops `n` cursor visibility(ies) off the stack, and writes the last one to the terminal (+flush).
+-- @tparam[opt=1] number n number of visibilities to pop
+-- @return true
+-- @within cursor_shape_stack
+function M.visible_pop(n)
+  t:write(M.visible_pops(n))
+  t:flush()
+  return true
+end
+
+
+
+
+local _shapestack = {
+  shape_reset
+}
 
 
 --- Re-applies the shape at the top of the stack (returns it, does not write it to the terminal).
@@ -127,7 +214,7 @@ end
 
 --- Pushes a cursor shape onto the stack (and returns it), without writing it to the terminal.
 -- @tparam string shape the shape to push, one of the keys `"block"`,
--- `"block_blink"`, `"underline"`, `"underline_blink"`, `"bar"`, `"bar_blink"`, `"hide"`
+-- `"block_blink"`, `"underline"`, `"underline_blink"`, `"bar"`, `"bar_blink"`
 -- @treturn string ansi sequence to write to the terminal
 -- @within cursor_shape_stack
 function M.shape_pushs(shape)
@@ -137,7 +224,7 @@ end
 
 --- Pushes a cursor shape onto the stack, and writes it to the terminal (+flush).
 -- @tparam string shape the shape to push, one of the keys `"block"`,
--- `"block_blink"`, `"underline"`, `"underline_blink"`, `"bar"`, `"bar_blink"`, `"hide"`
+-- `"block_blink"`, `"underline"`, `"underline_blink"`, `"bar"`, `"bar_blink"`
 -- @return true
 -- @within cursor_shape_stack
 function M.shape_push(shape)
