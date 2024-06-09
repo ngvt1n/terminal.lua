@@ -178,76 +178,81 @@ end
 
 local _positionstack = {}
 
-local old_readansi = sys.readansi
-local kbbuffer = {}
-local kbstart = 0
-local kbend = 0
-local function new_readansi(timeout)
-  if kbend ~= 0 then
-    -- we have buffered input
-    kbstart = kbstart + 1
-    local res = kbbuffer[kbstart]
-    kbbuffer[kbstart] = nil
-    if kbstart == kbend then
-      kbstart = 0
-      kbend = 0
-    end
-    return unpack(res)
-  end
-  return old_readansi(timeout)
-end
 
+local new_readansi, old_readansi do
+  local kbbuffer = {}
+  local kbstart = 0
+  local kbend = 0
 
---- Requests the current cursor position from the terminal.
--- Will read entire keyboard buffer to empty it, then request the cursor position.
--- The output buffer will be flushed.
--- In case of a keyboard error, the error will be returned here, but also by
--- `readansi` on a later call, because readansi retains the proper order of keyboard
--- input, whilst this function buffers input.
--- @treturn[1] number row
--- @treturn[1] number column
--- @treturn[2] nil
--- @treturn[2] string error message in case of a keyboard read error
--- @within cursor_position
-function M.cursor_get()
-  -- first empty keyboard buffer
-  while true do
-    local seq, typ, part = old_readansi(0)
-    if seq == nil and typ == "timeout" then
-      break
+  old_readansi = sys.readansi
+
+  function new_readansi(timeout)
+    if kbend ~= 0 then
+      -- we have buffered input
+      kbstart = kbstart + 1
+      local res = kbbuffer[kbstart]
+      kbbuffer[kbstart] = nil
+      if kbstart == kbend then
+        kbstart = 0
+        kbend = 0
+      end
+      return unpack(res)
     end
-    kbend = kbend + 1
-    kbbuffer[kbend] = pack(seq, typ, part)
-    if seq == nil then
-      -- error reading keyboard
-      return nil, "error reading keyboard: "..typ
-    end
+    return old_readansi(timeout)
   end
 
-  -- request cursor position, and flush
-  t:write("\27[6n")
-  t:flush()
 
-  -- read response
-  while true do
-    local seq, typ, part = old_readansi(1)
-    if seq == nil and typ == "timeout" then
-      error("no response from terminal, this is unexpected")
-    end
-    if typ == "ansi" then
-      local row, col = seq:match("$\27%[(%d+);(%d+)R$")
-      if row and col then
-        return tonumber(row), tonumber(col)
+  --- Requests the current cursor position from the terminal.
+  -- Will read entire keyboard buffer to empty it, then request the cursor position.
+  -- The output buffer will be flushed.
+  -- In case of a keyboard error, the error will be returned here, but also by
+  -- `readansi` on a later call, because readansi retains the proper order of keyboard
+  -- input, whilst this function buffers input.
+  -- @treturn[1] number row
+  -- @treturn[1] number column
+  -- @treturn[2] nil
+  -- @treturn[2] string error message in case of a keyboard read error
+  -- @within cursor_position
+  function M.cursor_get()
+    -- first empty keyboard buffer
+    while true do
+      local seq, typ, part = old_readansi(0)
+      if seq == nil and typ == "timeout" then
+        break
+      end
+      kbend = kbend + 1
+      kbbuffer[kbend] = pack(seq, typ, part)
+      if seq == nil then
+        -- error reading keyboard
+        return nil, "error reading keyboard: "..typ
       end
     end
-    kbend = kbend + 1
-    kbbuffer[kbend] = pack(seq, typ, part)
-    if seq == nil then
-      -- error reading keyboard
-      return nil, "error reading keyboard: "..typ
+
+    -- request cursor position, and flush
+    t:write("\27[6n")
+    t:flush()
+
+    -- read response
+    while true do
+      local seq, typ, part = old_readansi(0)
+      if seq == nil and typ == "timeout" then
+        error("no response from terminal, this is unexpected")
+      end
+      if typ == "ansi" then
+        local row, col = seq:match("^\27%[(%d+);(%d+)R$")
+        if row and col then
+          return tonumber(row), tonumber(col)
+        end
+      end
+      kbend = kbend + 1
+      kbbuffer[kbend] = pack(seq, typ, part)
+      if seq == nil then
+        -- error reading keyboard
+        return nil, "error reading keyboard: "..typ
+      end
     end
+    -- unreachable
   end
-  -- unreachable
 end
 
 --- Returns the ansi sequence to store to backup the current sursor position (in terminal storage, not stacked).
@@ -1201,6 +1206,7 @@ function M.line_verticals(n, char, lastcolumn)
   char = char or "│"
   lastcolumn = lastcolumn and 1 or 0
   local w = sys.utf8cwidth(char)
+  -- TODO: why do we need 'lastcolumn*2' here???
   return (char .. M.cursor_lefts(w-lastcolumn*2) .. M.cursor_downs(1)):rep(n-1) .. char
 end
 
@@ -1430,6 +1436,8 @@ do
   -- @return true
   -- @within initialization
   function M.initialize(displaybackup, filehandle)
+    assert(not termbackup, "terminal already initialized")
+
     filehandle = filehandle or io.stdout
     assert(io.type(filehandle) == 'file', "invalid file handle")
     t = filehandle
