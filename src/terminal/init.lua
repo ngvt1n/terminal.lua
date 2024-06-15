@@ -1146,14 +1146,14 @@ local _brightness = setmetatable({
 -- ansi sequences to apply for each brightness level (always works, does not need a reset)
 -- (a reset would also have an effect on underline, blink, and reverse)
 local _brightness_sequence = {
-  -- 0 = invisible, remove bright and dim
-  [0] = "\027[8m\027[22m",
-  -- 1 = dim, set dim, remove invisible and bright
-  [1] = "\027[2m\027[28m\027[22m",
+  -- 0 = remove bright and dim, apply invisible
+  [0] = "\027[22m\027[8m",
+  -- 1 = remove bold/dim, remove invisible, set dim
+  [1] = "\027[22m\027[28m\027[2m",
   -- 2 = normal, remove dim, bright, and invisible
   [2] = "\027[22m\027[28m",
-  -- 3 = bright, set bright, remove dim and invisible
-  [3] = "\027[1m\027[2m\027[28m",
+  -- 3 = remove bold/dim, remove invisible, set bright/bold
+  [3] = "\027[22m\027[28m\027[1m",
 }
 
 -- same thing, but simplified, if done AFTER an attribute reset
@@ -1201,19 +1201,19 @@ local function newtext(attr)
   local fg_color = attr.fg or attr.fg_r
   local bg_color = attr.bg or attr.bg_r
   local new = {
-    fg         = fg_color        == nil and last.fg         or colorcode(fg_color, attr.fg_g, attr.fg_b),
-    bg         = bg_color        == nil and last.bg         or colorcode(bg_color, attr.bg_g, attr.bg_b),
+    fg         = fg_color        == nil and last.fg         or colorcode(fg_color, attr.fg_g, attr.fg_b, true),
+    bg         = bg_color        == nil and last.bg         or colorcode(bg_color, attr.bg_g, attr.bg_b, false),
     brightness = attr.brightness == nil and last.brightness or _brightness[attr.brightness],
     underline  = attr.underline  == nil and last.underline  or (not not attr.underline),
     blink      = attr.blink      == nil and last.blink      or (not not attr.blink),
     reverse    = attr.reverse    == nil and last.reverse    or (not not attr.reverse),
   }
-  new.ansi = new.fg .. new.bg ..
-    attribute_reset .. _brightness_sequence_after_reset[new.brightness] ..
+  new.ansi = attribute_reset .. new.fg .. new.bg ..
+    _brightness_sequence_after_reset[new.brightness] ..
     (new.underline and underline_on or "") ..
     (new.blink and blink_on or "") ..
     (new.reverse and reverse_on or "")
-
+print("newtext:", (new.ansi:gsub("\27", "\\27")))
   return new
 end
 
