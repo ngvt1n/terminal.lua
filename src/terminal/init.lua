@@ -875,7 +875,7 @@ end
 -- @within scrolling_region
 function M.scroll_pops(n)
   local new_top = math.max(#_scrollstack - (n or 1), 1)
-  for i = new_top, #_scrollstack do
+  for i = new_top + 1, #_scrollstack do
     _scrollstack[i] = nil
   end
   return M.scroll_applys()
@@ -902,25 +902,51 @@ end
 local fg_color_reset = "\27[39m"
 local bg_color_reset = "\27[49m"
 local attribute_reset = "\27[0m"
-local bold_on = "\27[1m"
-local bold_off = "\27[22m"
 local underline_on = "\27[4m"
 local underline_off = "\27[24m"
 local blink_on = "\27[5m"
 local blink_off = "\27[25m"
 local reverse_on = "\27[7m"
 local reverse_off = "\27[27m"
-local invisible_on = "\27[8m"
-local invisible_off = "\27[28m"
+
+local fg_base_colors = setmetatable({
+  black = "\27[30m",
+  red = "\27[31m",
+  green = "\27[32m",
+  yellow = "\27[33m",
+  blue = "\27[34m",
+  magenta = "\27[35m",
+  cyan = "\27[36m",
+  white = "\27[37m",
+}, {
+  __index = function(_, key)
+    error("invalid string-based color: " .. tostring(key))
+  end,
+})
+
+local bg_base_colors = setmetatable({
+  black = "\27[40m",
+  red = "\27[41m",
+  green = "\27[42m",
+  yellow = "\27[43m",
+  blue = "\27[44m",
+  magenta = "\27[45m",
+  cyan = "\27[46m",
+  white = "\27[47m",
+}, {
+  __index = function(_, key)
+    error("invalid string-based color: " .. tostring(key))
+  end,
+})
 
 local default_colors = {
   fg = fg_color_reset, -- reset fg
   bg = bg_color_reset, -- reset bg
-  bold = false,
+  brightness = 2, -- normal
   underline = false,
   blink = false,
   reverse = false,
-  invisible = false,
+  ansi = fg_color_reset .. bg_color_reset .. attribute_reset,
 }
 
 local _colorstack = {
@@ -928,24 +954,55 @@ local _colorstack = {
 }
 
 -- Takes a color name/scheme by user and returns the ansi sequence for it.
-local function colorcode(color)
-  error("not implemented")
+-- This function takes three color types:
+--
+-- 1. base colors: black, red, green, yellow, blue, magenta, cyan, white. Use as `color("red")`.
+-- 2. extended colors: a number between 0 and 255. Use as `color(123)`.
+-- 3. RGB colors: three numbers between 0 and 255. Use as `color(123, 123, 123)`.
+-- @tparam integer color in case of RGB, the red value, a number for extended colors, a string color for base-colors
+-- @tparam[opt] number in case of RGB, the green value
+-- @tparam[opt] number in case of RGB, the blue value
+-- @tparam[opt] boolean fg true for foreground, false for background
+-- @treturn string ansi sequence to write to the terminal
+local function colorcode(r, g, b, fg)
+  if type(r) == "string" then
+    return fg and fg_base_colors[r] or bg_base_colors[r]
+  end
+
+  if type(r) ~= "number" or g < 0 or g > 255 then
+    return "expected arg #1 to be a string or an integer 0-255, got " .. tostring(r) .. " (" .. type(r) .. ")"
+  end
+  if g == nil then
+    return fg and "\27[38;5;" .. tostring(math.floor(r)) .. "m" or "\27[48;5;" .. tostring(math.floor(r)) .. "m"
+  end
+
+  if type(g) ~= "number" or g < 0 or g > 255 then
+    return "expected arg #2 to be a number 0-255, got " .. tostring(g) .. " (" .. type(g) .. ")"
+  end
+  g = tostring(math.floor(g))
+
+  if type(b) ~= "number" or b < 0 or b > 255 then
+    return "expected arg #3 to be a number 0-255, got " .. tostring(g) .. " (" .. type(g) .. ")"
+  end
+  b = tostring(math.floor(b))
+
+  return fg and "\27[38;2;" .. r .. ";" .. g .. ";" .. b .. "m" or "\27[48;2;" .. r .. ";" .. g .. ";" .. b .. "m"
 end
 
 --- Creates an ansi sequence to set the foreground color without writing it to the terminal.
 -- @tparam string color the color to set
 -- @treturn string ansi sequence to write to the terminal
 -- @within textcolor
-function M.color_fgs(color)
-  return colorcode(color)
+function M.color_fgs(r, g, b)
+  return colorcode(r, g, b, true)
 end
 
 --- Sets the foreground color and writes it to the terminal (+flush).
 -- @tparam string color the color to set
 -- @return true
 -- @within textcolor
-function M.color_fg(color)
-  t:write(M.color_fgs(color))
+function M.color_fg(r, g, b)
+  t:write(M.color_fgs(r, g, b))
   t:flush()
   return true
 end
@@ -954,48 +1011,16 @@ end
 -- @tparam string color the color to set
 -- @treturn string ansi sequence to write to the terminal
 -- @within textcolor
-function M.color_bgs(color)
-  return colorcode(color)
+function M.color_bgs(r, g, b)
+  return colorcode(r, g, b, false)
 end
 
 --- Sets the background color and writes it to the terminal (+flush).
 -- @tparam string color the color to set
 -- @return true
 -- @within textcolor
-function M.color_bg(color)
-  t:write(M.color_bgs(color))
-  t:flush()
-  return true
-end
-
---- Creates an ansi sequence to set the bold attribute without writing it to the terminal.
--- @treturn string ansi sequence to write to the terminal
--- @within textcolor
-function M.bold_ons()
-  return bold_on
-end
-
---- Sets the bold attribute and writes it to the terminal (+flush).
--- @return true
--- @within textcolor
-function M.bold_on()
-  t:write(M.bold_ons())
-  t:flush()
-  return true
-end
-
---- Creates an ansi sequence to unset the bold attribute without writing it to the terminal.
--- @treturn string ansi sequence to write to the terminal
--- @within textcolor
-function M.bold_offs()
-  return bold_off
-end
-
---- Unsets the bold attribute and writes it to the terminal (+flush).
--- @return true
--- @within textcolor
-function M.bold_off()
-  t:write(M.bold_offs())
+function M.color_bg(r, g, b)
+  t:write(M.color_bgs(r, g, b))
   t:flush()
   return true
 end
@@ -1096,57 +1121,98 @@ function M.reverse_off()
   return true
 end
 
---- Creates an ansi sequence to set the invisible attribute without writing it to the terminal.
+
+-- lookup brightness levels
+local _brightness = setmetatable({
+  off = 0,
+  low = 1,
+  normal = 2,
+  high = 3,
+  [0] = 0,
+  [1] = 1,
+  [2] = 2,
+  [3] = 3,
+  -- common terminal codes
+  invisible = 0,
+  dim = 1,
+  bright = 3,
+  bold = 3,
+}, {
+  __index = function(_, key)
+    error("invalid brightness level: " .. tostring(key))
+  end,
+})
+
+-- ansi sequences to apply for each brightness level (always works, does not need a reset)
+-- (a reset would also have an effect on underline, blink, and reverse)
+local _brightness_sequence = {
+  -- 0 = invisible, remove bright and dim
+  [0] = "\027[8m\027[22m",
+  -- 1 = dim, set dim, remove invisible and bright
+  [1] = "\027[2m\027[28m\027[22m",
+  -- 2 = normal, remove dim, bright, and invisible
+  [2] = "\027[22m\027[28m",
+  -- 3 = bright, set bright, remove dim and invisible
+  [3] = "\027[1m\027[2m\027[28m",
+}
+
+-- same thing, but simplified, if done AFTER an attribute reset
+local _brightness_sequence_after_reset = {
+  -- 0 = invisible
+  [0] = "\027[8m",
+  -- 1 = dim
+  [1] = "\027[2m",
+  -- 2 = normal (no additional attributes needed after reset)
+  [2] = "",
+  -- 3 = bright/bold
+  [3] = "\027[1m",
+}
+
+
+--- Creates an ansi sequence to set the brightness without writing it to the terminal.
+-- `brightness` can be one of the following:
+--
+-- - `0`, `"off"`, or `"invisble"` for invisible
+-- - `1`, `"low"`, or `"dim"` for dim
+-- - `2`, `"normal"` for normal
+-- - `3`, `"high"`, `"bright"`, or `"bold"` for bright
+--
+-- @tparam string|integer brightness the brightness to set
 -- @treturn string ansi sequence to write to the terminal
 -- @within textcolor
-function M.invisible_ons()
-  return invisible_on
+function M.brightnesss(brightness)
+  return _brightness_sequence[_brightness[brightness]]
 end
 
---- Sets the invisible attribute and writes it to the terminal (+flush).
+--- Sets the brightness and writes it to the terminal (+flush).
+-- @tparam string|integer brightness the brightness to set
 -- @return true
 -- @within textcolor
-function M.invisible_on()
-  t:write(M.invisible_ons())
+function M.brightness(brightness)
+  t:write(M.brightnesss(brightness))
   t:flush()
   return true
 end
 
---- Creates an ansi sequence to unset the invisible attribute without writing it to the terminal.
--- @treturn string ansi sequence to write to the terminal
--- @within textcolor
-function M.invisible_offs()
-  return invisible_off
-end
-
---- Unsets the invisible attribute and writes it to the terminal (+flush).
--- @return true
--- @within textcolor
-function M.invisible_off()
-  t:write(M.invisible_offs())
-  t:flush()
-  return true
-end
 
 
 local function newtext(attr)
   local last = _colorstack[#_colorstack]
+  local fg_color = attr.fg or attr.fg_r
+  local bg_color = attr.bg or attr.bg_r
   local new = {
-    fg        = attr.fg         == nil and last.fg        or colorcode(attr.fg),
-    bg        = attr.bg         == nil and last.bg        or colorcode(attr.bg),
-    bold      = attr.bold       == nil and last.bold      or (not not attr.bold),
-    underline = attr.underline  == nil and last.underline or (not not attr.underline),
-    blink     = attr.blink      == nil and last.blink     or (not not attr.blink),
-    reverse   = attr.reverse    == nil and last.reverse   or (not not attr.reverse),
-    invisible = attr.invisible  == nil and last.invisible or (not not attr.invisible),
+    fg         = fg_color        == nil and last.fg         or colorcode(fg_color, attr.fg_g, attr.fg_b),
+    bg         = bg_color        == nil and last.bg         or colorcode(bg_color, attr.bg_g, attr.bg_b),
+    brightness = attr.brightness == nil and last.brightness or _brightness[attr.brightness],
+    underline  = attr.underline  == nil and last.underline  or (not not attr.underline),
+    blink      = attr.blink      == nil and last.blink      or (not not attr.blink),
+    reverse    = attr.reverse    == nil and last.reverse    or (not not attr.reverse),
   }
   new.ansi = new.fg .. new.bg ..
-    attribute_reset ..
-    (new.bold and bold_on or "") ..
+    attribute_reset .. _brightness_sequence_after_reset[new.brightness] ..
     (new.underline and underline_on or "") ..
     (new.blink and blink_on or "") ..
-    (new.reverse and reverse_on or "") ..
-    (new.invisible and invisible_on or "")
+    (new.reverse and reverse_on or "")
 
   return new
 end
@@ -1154,13 +1220,12 @@ end
 --- Creates an ansi sequence to set the text attributes without writing it to the terminal.
 -- Every element omitted in the `attr` table will be taken from the current top of the stack.
 -- @tparam table attr the attributes to set, with keys:
--- @tparam[opt] string attr.fg the foreground color to set
--- @tparam[opt] string attr.bg the background color to set
--- @tparam[opt] boolean attr.bold whether to set bold
+-- @tparam[opt] string attr.fg the foreground color to set, takes precedence of `fg_r`, `fg_g`, `fg_b`.
+-- @tparam[opt] string attr.bg the background color to set, takes precedence of `bg_r`, `bg_g`, `bg_b`.
+-- @tparam[opt] string|number attr.brightness the brightness level to set
 -- @tparam[opt] boolean attr.underline whether to set underline
 -- @tparam[opt] boolean attr.blink whether to set blink
 -- @tparam[opt] boolean attr.reverse whether to set reverse
--- @tparam[opt] boolean attr.invisible whether to set invisible
 -- @treturn string ansi sequence to write to the terminal
 -- @within textcolor
 function M.textsets(attr)
@@ -1207,16 +1272,11 @@ end
 -- @within textcolor
 function M.textpops(n)
   n = n or 1
-  local l = #_colorstack
-  while n > 1 and l > 1 do
-    table.remove(_colorstack)
-    l = l - 1
-    n = n - 1
+  local newtop = math.max(#_colorstack - n, 1)
+  for i = newtop + 1, #_colorstack do
+    _colorstack[i] = nil
   end
-  if l == 1 then
-    return _colorstack[1]  -- cannot pop last one
-  end
-  return table.remove(_colorstack)
+  return _colorstack[#_colorstack].ansi
 end
 
 --- Pops n attributes off the stack, and writes the last one to the terminal (+flush).
@@ -1510,8 +1570,8 @@ end
 do
   local termbackup
   local reset = "\27[0m"
-  local savescreen = "\27[?47h"
-  local restorescreen = "\27[?47l"
+  local savescreen = "\27[?1049h" -- save cursor pos + switch to alternate screen buffer
+  local restorescreen = "\27[?1049l" -- restore cursor pos + switch to main screen buffer
 
 
   --- Initializes the terminal for use.
@@ -1560,6 +1620,16 @@ do
   -- @within initialization
 function M.shutdown()
     assert(termbackup, "terminal not initialized")
+
+    -- restore all stacks
+    t:write(
+      M.shape_pops(math.huge),
+      M.visible_pops(math.huge),
+      -- M.textpops(math.huge),
+      M.scroll_pops(math.huge)
+    )
+    t:flush()
+
     if termbackup.displaybackup then
       t:write(restorescreen)
       t:flush()
