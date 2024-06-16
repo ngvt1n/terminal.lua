@@ -659,6 +659,75 @@ function M.cursor_move(rows, columns)
   return true
 end
 
+--- Creates an ansi sequence to move the cursor to a column on the current row without writing it to the terminal.
+-- @tparam number column the column to move to
+-- @treturn string ansi sequence to write to the terminal
+-- @within cursor_moving
+function M.cursor_tocolumns(column)
+  return "\27["..tostring(column).."G"
+end
+
+--- Moves the cursor to a column on the current row and writes it to the terminal (+flush).
+-- @tparam number column the column to move to
+-- @return true
+-- @within cursor_moving
+function M.cursor_tocolumn(column)
+  t:write(M.cursor_tocolumns(column))
+  return true
+end
+
+--- Creates an ansi sequence to move the cursor to a row on the current column without writing it to the terminal.
+-- @tparam number row the row to move to
+-- @treturn string ansi sequence to write to the terminal
+-- @within cursor_moving
+function M.cursor_torows(row)
+  return "\27["..tostring(row).."d"
+end
+
+--- Moves the cursor to a row on the current column and writes it to the terminal (+flush).
+-- @tparam number row the row to move to
+-- @return true
+-- @within cursor_moving
+function M.cursor_torow(row)
+  t:write(M.cursor_torows(row))
+  return true
+end
+
+--- Creates an ansi sequence to move the cursor to the start of the next row without writing it to the terminal.
+-- @tparam[opt=1] number rows the number of rows to move down
+-- @treturn string ansi sequence to write to the terminal
+-- @within cursor_moving
+function M.cursor_row_downs(rows)
+  return "\27["..tostring(rows or 1).."E"
+end
+
+--- Moves the cursor to the start of the next row and writes it to the terminal (+flush).
+-- @tparam[opt=1] number rows the number of rows to move down
+-- @return true
+-- @within cursor_moving
+function M.cursor_row_down(rows)
+  t:write(M.cursor_row_downs(rows))
+  return true
+end
+
+--- Creates an ansi sequence to move the cursor to the start of the previous row without writing it to the terminal.
+-- @tparam[opt=1] number rows the number of rows to move up
+-- @treturn string ansi sequence to write to the terminal
+-- @within cursor_moving
+function M.cursor_row_ups(rows)
+  return "\27["..tostring(rows or 1).."F"
+end
+
+--- Moves the cursor to the start of the previous row and writes it to the terminal (+flush).
+-- @tparam[opt=1] number rows the number of rows to move up
+-- @return true
+-- @within cursor_moving
+function M.cursor_row_up(rows)
+  t:write(M.cursor_row_ups(rows))
+  return true
+end
+
+
 --=============================================================================
 -- clearing
 --=============================================================================
