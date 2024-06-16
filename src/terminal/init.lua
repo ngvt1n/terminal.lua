@@ -959,9 +959,9 @@ local _colorstack = {
 -- 1. base colors: black, red, green, yellow, blue, magenta, cyan, white. Use as `color("red")`.
 -- 2. extended colors: a number between 0 and 255. Use as `color(123)`.
 -- 3. RGB colors: three numbers between 0 and 255. Use as `color(123, 123, 123)`.
--- @tparam integer color in case of RGB, the red value, a number for extended colors, a string color for base-colors
--- @tparam[opt] number in case of RGB, the green value
--- @tparam[opt] number in case of RGB, the blue value
+-- @tparam integer r in case of RGB, the red value, a number for extended colors, a string color for base-colors
+-- @tparam[opt] number g in case of RGB, the green value
+-- @tparam[opt] number b in case of RGB, the blue value
 -- @tparam[opt] boolean fg true for foreground, false for background
 -- @treturn string ansi sequence to write to the terminal
 local function colorcode(r, g, b, fg)
@@ -990,7 +990,9 @@ local function colorcode(r, g, b, fg)
 end
 
 --- Creates an ansi sequence to set the foreground color without writing it to the terminal.
--- @tparam string color the color to set
+-- @tparam integer r in case of RGB, the red value, a number for extended colors, a string color for base-colors
+-- @tparam[opt] number g in case of RGB, the green value
+-- @tparam[opt] number b in case of RGB, the blue value
 -- @treturn string ansi sequence to write to the terminal
 -- @within textcolor
 function M.color_fgs(r, g, b)
@@ -998,7 +1000,9 @@ function M.color_fgs(r, g, b)
 end
 
 --- Sets the foreground color and writes it to the terminal (+flush).
--- @tparam string color the color to set
+-- @tparam integer r in case of RGB, the red value, a number for extended colors, a string color for base-colors
+-- @tparam[opt] number g in case of RGB, the green value
+-- @tparam[opt] number b in case of RGB, the blue value
 -- @return true
 -- @within textcolor
 function M.color_fg(r, g, b)
@@ -1008,7 +1012,9 @@ function M.color_fg(r, g, b)
 end
 
 --- Creates an ansi sequence to set the background color without writing it to the terminal.
--- @tparam string color the color to set
+-- @tparam integer r in case of RGB, the red value, a number for extended colors, a string color for base-colors
+-- @tparam[opt] number g in case of RGB, the green value
+-- @tparam[opt] number b in case of RGB, the blue value
 -- @treturn string ansi sequence to write to the terminal
 -- @within textcolor
 function M.color_bgs(r, g, b)
@@ -1016,7 +1022,9 @@ function M.color_bgs(r, g, b)
 end
 
 --- Sets the background color and writes it to the terminal (+flush).
--- @tparam string color the color to set
+-- @tparam integer r in case of RGB, the red value, a number for extended colors, a string color for base-colors
+-- @tparam[opt] number g in case of RGB, the green value
+-- @tparam[opt] number b in case of RGB, the blue value
 -- @return true
 -- @within textcolor
 function M.color_bg(r, g, b)
@@ -1213,15 +1221,21 @@ local function newtext(attr)
     (new.underline and underline_on or "") ..
     (new.blink and blink_on or "") ..
     (new.reverse and reverse_on or "")
-print("newtext:", (new.ansi:gsub("\27", "\\27")))
+  -- print("newtext:", (new.ansi:gsub("\27", "\\27")))
   return new
 end
 
 --- Creates an ansi sequence to set the text attributes without writing it to the terminal.
--- Every element omitted in the `attr` table will be taken from the current top of the stack.
+-- Only set what you change. Every element omitted in the `attr` table will be taken from the current top of the stack.
 -- @tparam table attr the attributes to set, with keys:
--- @tparam[opt] string attr.fg the foreground color to set, takes precedence of `fg_r`, `fg_g`, `fg_b`.
--- @tparam[opt] string attr.bg the background color to set, takes precedence of `bg_r`, `bg_g`, `bg_b`.
+-- @tparam[opt] string|integer attr.fg the foreground color to set. Base color (string), or extended color (number). Takes precedence of `fg_r`, `fg_g`, `fg_b`.
+-- @tparam[opt] integer attr.fg_r the red value of the foreground color to set.
+-- @tparam[opt] integer attr.fg_g the green value of the foreground color to set.
+-- @tparam[opt] integer attr.fg_b the blue value of the foreground color to set.
+-- @tparam[opt] string|integer attr.bg the background color to set. Base color (string), or extended color (number). Takes precedence of `bg_r`, `bg_g`, `bg_b`.
+-- @tparam[opt] integer attr.bg_r the red value of the background color to set.
+-- @tparam[opt] integer attr.bg_g the green value of the background color to set.
+-- @tparam[opt] integer attr.bg_b the blue value of the background color to set.
 -- @tparam[opt] string|number attr.brightness the brightness level to set
 -- @tparam[opt] boolean attr.underline whether to set underline
 -- @tparam[opt] boolean attr.blink whether to set blink
@@ -1488,7 +1502,7 @@ M.box_fmt = setmetatable({
 -- after drawing the cursor will be in the same position.
 -- @tparam number height the height of the box in rows
 -- @tparam number width the width of the box in columns
--- @tparam[opt="single"] table format the format for the box, with keys:
+-- @tparam[opt] table format the format for the box (default is single line), with keys:
 -- @tparam[opt=" "] string format.h the horizontal line character
 -- @tparam[opt=""] string format.v the vertical line character
 -- @tparam[opt=""] string format.tl the top left corner character
@@ -1497,9 +1511,9 @@ M.box_fmt = setmetatable({
 -- @tparam[opt=""] string format.br the bottom right corner character
 -- @tparam[opt=""] string format.pre the title-prefix character(s)
 -- @tparam[opt=""] string format.post the left-postfix character(s)
--- @tparam bool clear whether to clear the box contents
+-- @tparam[opt=false] bool clear whether to clear the box contents
 -- @tparam[opt=""] string title the title to draw
--- @tparam[opt] boolean lastcolumn whether to draw the last column of the terminal
+-- @tparam[opt=false] boolean lastcolumn whether to draw the last column of the terminal
 -- @treturn string ansi sequence to write to the terminal
 -- @within lines
 function M.boxs(height, width, format, clear, title, lastcolumn)
