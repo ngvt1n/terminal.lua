@@ -1,6 +1,20 @@
 --- Terminal library for Lua.
 --
--- Explain some basics, or the design.
+-- This terminal library builds upon the cross-platform terminal capabilities of LuaSystem. As such
+-- it works modern terminals on Windows, Unix, and Mac systems.
+--
+-- It provides a simple and consistent interface to the terminal, allowing for cursor positioning,
+-- cursor shape and visibility, text formatting, clearing the screen, scrolling, and more.
+--
+-- Design:
+--
+-- - `initialize` and `shutdown` functions are provided to setup and teardown the terminal.
+-- - `print` and `write` functions that protect against buffer overruns (causing dropped data).
+-- - most functions have 2 implementations: plain and with a trailing `s`, eg. `cursor_up` and
+--   `cursor_ups`. The plain version writes to the terminal, the `s` version returns the ansi
+--   sequence as a string without writing it.
+-- - functions that change the terminal state (like cursor position, visibility, etc) have a stack
+--   based version, allowing for easy push/pop operations.
 --
 -- @copyright Copyright (c) 2024-2024 Thijs Schreijer
 -- @author Thijs Schreijer
@@ -30,16 +44,73 @@ local t -- the terminal/stream to operate on, default io.stdout
 --=============================================================================
 
 --- Stream support.
--- Shortcuts to the stream used.
+-- Shortcuts to the stream used, with buffer overrun protection.
 -- @section stream
 
---- Writes to the stream.
+do
+  local chunksize = 1024 -- chunk size to write in one go
+  local bytecount_left = chunksize -- number of bytes to write before flush+sleep required
+  local delay = 0.001 -- delay in seconds after each chunk write
+
+  --- Writes to the stream in chunks.
+  -- Parameters are written to the stream, and flushed after each chunk. A small sleep is
+  -- added after each chunk to allow the terminal to process the data.
+  -- This is done to prevent the terminal buffer from overrunning and dropping data.
+  -- @param ... the values to write
+  -- @return the return value of the stream's `write` function
+  -- @within stream
+  function M.write(...)
+    local ok, err
+    -- format arguments as a single string
+    local count = select("#", ...)
+    if count == 0 then
+      return t:write()
+    end
+
+    local data = {...}
+    for i = 1, count do
+      data[i] = tostring(data[i])
+    end
+    data = table.concat(data, "\t")
+
+    -- write to stream, in chunks. flush and sleep in between
+    while #data > 0 do
+      local chunk = data:sub(1, bytecount_left)
+      data = data:sub(bytecount_left + 1)
+
+      ok, err = t:write(chunk)
+      if not ok then
+        return ok, err
+      end
+
+      bytecount_left = bytecount_left - #chunk
+      if bytecount_left <= 0 then
+        bytecount_left = chunksize
+        t:flush()
+        sys.sleep(delay) -- sleep a bit to allow the terminal to process the data
+      end
+    end
+
+    return ok, err
+  end
+end
+
+
+
+--- Prints to the stream in chunks.
+-- Same as `write`, but adds a newline at the end.
 -- @param ... the values to write
 -- @return the return value of the stream's `write` function
 -- @within stream
-function M.write(...)
-  return t:write(...)
+function M.print(...)
+  local ok, err = M.write(...)
+  if not ok then
+    return ok, err
+  end
+  return M.write("\n")
 end
+
+
 
 --- Flushes the stream.
 -- @return the return value of the stream's `flush` function
@@ -76,7 +147,7 @@ end
 -- @return true
 -- @within cursor_shapes
 function M.visible(visible)
-  t:write(M.visibles(visible))
+  M.write(M.visibles(visible))
   t:flush()
   return true
 end
@@ -114,7 +185,7 @@ end
 -- @return true
 -- @within cursor_shapes
 function M.shape(shape)
-  t:write(shapes[shape])
+  M.write(shapes[shape])
   t:flush()
   return true
 end
@@ -142,7 +213,7 @@ end
 -- @return true
 -- @within cursor_shape_stack
 function M.visible_apply()
-  t:write(M.visible_applys())
+  M.write(M.visible_applys())
   t:flush()
   return true
 end
@@ -161,7 +232,7 @@ end
 -- @return true
 -- @within cursor_shape_stack
 function M.visible_push(visible)
-  t:write(M.visible_pushs(visible))
+  M.write(M.visible_pushs(visible))
   t:flush()
   return true
 end
@@ -183,7 +254,7 @@ end
 -- @return true
 -- @within cursor_shape_stack
 function M.visible_pop(n)
-  t:write(M.visible_pops(n))
+  M.write(M.visible_pops(n))
   t:flush()
   return true
 end
@@ -207,7 +278,7 @@ end
 -- @return true
 -- @within cursor_shape_stack
 function M.shape_apply()
-  t:write(_shapestack[#_shapestack])
+  M.write(_shapestack[#_shapestack])
   t:flush()
   return true
 end
@@ -228,7 +299,7 @@ end
 -- @return true
 -- @within cursor_shape_stack
 function M.shape_push(shape)
-  t:write(M.shape_pushs(shape))
+  M.write(M.shape_pushs(shape))
   t:flush()
   return true
 end
@@ -250,7 +321,7 @@ end
 -- @return true
 -- @within cursor_shape_stack
 function M.shape_pop(n)
-  t:write(M.shape_pops(n))
+  M.write(M.shape_pops(n))
   t:flush()
   return true
 end
@@ -316,7 +387,7 @@ local new_readansi, old_readansi do
     end
 
     -- request cursor position, and flush
-    t:write("\27[6n")
+    M.write("\27[6n")
     t:flush()
 
     -- read response
@@ -353,7 +424,7 @@ end
 -- @return true
 -- @within cursor_position
 function M.cursor_save()
-  t:write(M.cursor_saves())
+  M.write(M.cursor_saves())
   t:flush()
   return true
 end
@@ -369,7 +440,7 @@ end
 -- @return true
 -- @within cursor_position
 function M.cursor_restore()
-  t:write(M.cursor_restores())
+  M.write(M.cursor_restores())
   t:flush()
   return true
 end
@@ -389,7 +460,7 @@ end
 -- @return true
 -- @within cursor_position
 function M.cursor_set(row, column)
-  t:write(M.cursor_sets(row, column))
+  M.write(M.cursor_sets(row, column))
   t:flush()
   return true
 end
@@ -421,7 +492,7 @@ end
 -- @return true
 -- @within cursor_position_stack
 function M.cursor_push(row, column)
-  t:write(M.cursor_pushs(row, column))
+  M.write(M.cursor_pushs(row, column))
   t:flush()
   return true
 end
@@ -448,7 +519,7 @@ end
 -- @return true
 -- @within cursor_position_stack
 function M.cursor_pop(n)
-  t:write(M.cursor_pops(n))
+  M.write(M.cursor_pops(n))
   t:flush()
   return true
 end
@@ -474,7 +545,7 @@ end
 -- @return true
 -- @within cursor_moving
 function M.cursor_up(n)
-  t:write(M.cursor_ups(n))
+  M.write(M.cursor_ups(n))
   t:flush()
   return true
 end
@@ -493,7 +564,7 @@ end
 -- @return true
 -- @within cursor_moving
 function M.cursor_down(n)
-  t:write(M.cursor_downs(n))
+  M.write(M.cursor_downs(n))
   t:flush()
   return true
 end
@@ -515,7 +586,7 @@ end
 -- @return true
 -- @within cursor_moving
 function M.cursor_vertical(n)
-  t:write(M.cursor_verticals(n))
+  M.write(M.cursor_verticals(n))
   t:flush()
   return true
 end
@@ -534,7 +605,7 @@ end
 -- @return true
 -- @within cursor_moving
 function M.cursor_left(n)
-  t:write(M.cursor_lefts(n))
+  M.write(M.cursor_lefts(n))
   t:flush()
   return true
 end
@@ -553,7 +624,7 @@ end
 -- @return true
 -- @within cursor_moving
 function M.cursor_right(n)
-  t:write(M.cursor_rights(n))
+  M.write(M.cursor_rights(n))
   t:flush()
   return true
 end
@@ -575,7 +646,7 @@ end
 -- @return true
 -- @within cursor_moving
 function M.cursor_horizontal(n)
-  t:write(M.cursor_horizontals(n))
+  M.write(M.cursor_horizontals(n))
   t:flush()
   return true
 end
@@ -595,7 +666,7 @@ end
 -- @return true
 -- @within cursor_moving
 function M.cursor_move(rows, columns)
-  t:write(M.cursor_moves(rows, columns))
+  M.write(M.cursor_moves(rows, columns))
   t:flush()
   return true
 end
@@ -618,7 +689,7 @@ end
 -- @return true
 -- @within clearing
 function M.clear()
-  t:write(M.clears())
+  M.write(M.clears())
   t:flush()
   return true
 end
@@ -634,7 +705,7 @@ end
 -- @return true
 -- @within clearing
 function M.clear_top()
-  t:write(M.clear_tops())
+  M.write(M.clear_tops())
   t:flush()
   return true
 end
@@ -650,7 +721,7 @@ end
 -- @return true
 -- @within clearing
 function M.clear_bottom()
-  t:write(M.clear_bottoms())
+  M.write(M.clear_bottoms())
   t:flush()
   return true
 end
@@ -666,7 +737,7 @@ end
 -- @return true
 -- @within clearing
 function M.clear_line()
-  t:write(M.clear_lines())
+  M.write(M.clear_lines())
   t:flush()
   return true
 end
@@ -682,7 +753,7 @@ end
 -- @return true
 -- @within clearing
 function M.clear_start()
-  t:write(M.clear_starts())
+  M.write(M.clear_starts())
   t:flush()
   return true
 end
@@ -698,7 +769,7 @@ end
 -- @return true
 -- @within clearing
 function M.clear_end()
-  t:write(M.clear_ends())
+  M.write(M.clear_ends())
   t:flush()
   return true
 end
@@ -722,7 +793,7 @@ end
 -- @treturn string ansi sequence to write to the terminal
 -- @within clearing
 function M.clear_box(height, width)
-  t:write(M.clear_boxs(height, width))
+  M.write(M.clear_boxs(height, width))
   t:flush()
   return true
 end
@@ -759,7 +830,7 @@ end
 -- @return true
 -- @within scrolling
 function M.scroll_region(top, bottom)
-  t:write(M.scroll_regions(top, bottom))
+  M.write(M.scroll_regions(top, bottom))
   t:flush()
   return true
 end
@@ -778,7 +849,7 @@ end
 -- @return true
 -- @within scrolling
 function M.scroll_up(n)
-  t:write(M.scroll_ups(n))
+  M.write(M.scroll_ups(n))
   t:flush()
   return true
 end
@@ -797,7 +868,7 @@ end
 -- @return true
 -- @within scrolling
 function M.scroll_down(n)
-  t:write(M.scroll_downs(n))
+  M.write(M.scroll_downs(n))
   t:flush()
   return true
 end
@@ -818,7 +889,7 @@ end
 -- @return true
 -- @within scrolling
 function M.scroll_(n)
-  t:write(M.scroll_s(n))
+  M.write(M.scroll_s(n))
   t:flush()
   return true
 end
@@ -841,7 +912,7 @@ end
 -- @return true
 -- @within scrolling_region
 function M.scroll_apply()
-  t:write(_scrollstack[#_scrollstack])
+  M.write(_scrollstack[#_scrollstack])
   t:flush()
   return true
 end
@@ -864,7 +935,7 @@ end
 -- @return true
 -- @within scrolling_region
 function M.scroll_push(top, bottom)
-  t:write(M.scroll_pushs(top, bottom))
+  M.write(M.scroll_pushs(top, bottom))
   t:flush()
   return true
 end
@@ -886,7 +957,7 @@ end
 -- @return true
 -- @within scrolling_region
 function M.scroll_pop(n)
-  t:write(M.scroll_pops(n))
+  M.write(M.scroll_pops(n))
   t:flush()
   return true
 end
@@ -1006,7 +1077,7 @@ end
 -- @return true
 -- @within textcolor
 function M.color_fg(r, g, b)
-  t:write(M.color_fgs(r, g, b))
+  M.write(M.color_fgs(r, g, b))
   t:flush()
   return true
 end
@@ -1028,7 +1099,7 @@ end
 -- @return true
 -- @within textcolor
 function M.color_bg(r, g, b)
-  t:write(M.color_bgs(r, g, b))
+  M.write(M.color_bgs(r, g, b))
   t:flush()
   return true
 end
@@ -1044,7 +1115,7 @@ end
 -- @return true
 -- @within textcolor
 function M.underline_on()
-  t:write(M.underline_ons())
+  M.write(M.underline_ons())
   t:flush()
   return true
 end
@@ -1060,7 +1131,7 @@ end
 -- @return true
 -- @within textcolor
 function M.underline_off()
-  t:write(M.underline_offs())
+  M.write(M.underline_offs())
   t:flush()
   return true
 end
@@ -1076,7 +1147,7 @@ end
 -- @return true
 -- @within textcolor
 function M.blink_on()
-  t:write(M.blink_ons())
+  M.write(M.blink_ons())
   t:flush()
   return true
 end
@@ -1092,7 +1163,7 @@ end
 -- @return true
 -- @within textcolor
 function M.blink_off()
-  t:write(M.blink_offs())
+  M.write(M.blink_offs())
   t:flush()
   return true
 end
@@ -1108,7 +1179,7 @@ end
 -- @return true
 -- @within textcolor
 function M.reverse_on()
-  t:write(M.reverse_ons())
+  M.write(M.reverse_ons())
   t:flush()
   return true
 end
@@ -1124,7 +1195,7 @@ end
 -- @return true
 -- @within textcolor
 function M.reverse_off()
-  t:write(M.reverse_offs())
+  M.write(M.reverse_offs())
   t:flush()
   return true
 end
@@ -1197,7 +1268,7 @@ end
 -- @return true
 -- @within textcolor
 function M.brightness(brightness)
-  t:write(M.brightnesss(brightness))
+  M.write(M.brightnesss(brightness))
   t:flush()
   return true
 end
@@ -1253,7 +1324,7 @@ end
 -- @return true
 -- @within textcolor
 function M.textset(attr)
-  t:write(newtext(attr).ansi)
+  M.write(newtext(attr).ansi)
   t:flush()
   return true
 end
@@ -1275,7 +1346,7 @@ end
 -- @return true
 -- @within textcolor
 function M.textpush(attr)
-  t:write(M.textpushs(attr))
+  M.write(M.textpushs(attr))
   t:flush()
   return true
 end
@@ -1298,7 +1369,7 @@ end
 -- @return true
 -- @within textcolor
 function M.textpop(n)
-  t:write(M.textpops(n))
+  M.write(M.textpops(n))
   t:flush()
   return true
 end
@@ -1314,7 +1385,7 @@ end
 -- @return true
 -- @within textcolor
 function M.textapply()
-  t:write(_colorstack[#_colorstack].ansi)
+  M.write(_colorstack[#_colorstack].ansi)
   t:flush()
   return true
 end
@@ -1351,7 +1422,7 @@ end
 -- @return true
 -- @within lines
 function M.line_horizontal(n, char)
-  t:write(M.line_horizontals(n, char))
+  M.write(M.line_horizontals(n, char))
   t:flush()
   return true
 end
@@ -1378,7 +1449,7 @@ end
 -- @return true
 -- @within lines
 function M.line_vertical(n, char)
-  t:write(M.line_verticals(n, char))
+  M.write(M.line_verticals(n, char))
   t:flush()
   return true
 end
@@ -1438,7 +1509,7 @@ end
 -- @return true
 -- @within lines
 function M.line_title(title, width, char, pre, post)
-  t:write(M.line_titles(title, width, char, pre, post))
+  M.write(M.line_titles(title, width, char, pre, post))
   t:flush()
   return true
 end
@@ -1568,7 +1639,7 @@ end
 -- @return true
 -- @within lines
 function M.box(height, width, format, clear, title, lastcolumn)
-  t:write(M.boxs(height, width, format, clear, title, lastcolumn))
+  M.write(M.boxs(height, width, format, clear, title, lastcolumn))
   t:flush()
   return true
 end
@@ -1605,7 +1676,7 @@ do
 
     termbackup = sys.termbackup()
     if displaybackup then
-      t:write(savescreen)
+      M.write(savescreen)
       termbackup.displaybackup = true
     end
 
@@ -1636,7 +1707,7 @@ function M.shutdown()
     assert(termbackup, "terminal not initialized")
 
     -- restore all stacks
-    t:write(
+    M.write(
       M.shape_pops(math.huge),
       M.visible_pops(math.huge),
       -- M.textpops(math.huge),
@@ -1645,10 +1716,10 @@ function M.shutdown()
     t:flush()
 
     if termbackup.displaybackup then
-      t:write(restorescreen)
+      M.write(restorescreen)
       t:flush()
     end
-    t:write(reset)
+    M.write(reset)
     t:flush()
 
     sys.termrestore(termbackup)
