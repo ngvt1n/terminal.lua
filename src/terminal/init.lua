@@ -150,7 +150,7 @@ function M.visibles(visible)
   return visible and cursor_show or cursor_hide
 end
 
---- Shows or hides the cursor and writes it to the terminal (+flush).
+--- Shows or hides the cursor and writes it to the terminal.
 -- @tparam boolean visible true to show, false to hide
 -- @return true
 -- @within cursor_shapes
@@ -186,7 +186,7 @@ function M.shapes(shape)
   return shapes[shape]
 end
 
---- Sets the cursor shape and writes it to the terminal (+flush).
+--- Sets the cursor shape and writes it to the terminal.
 -- @tparam string shape the shape to set, one of the keys `"block"`,
 -- `"block_blink"`, `"underline"`, `"underline_blink"`, `"bar"`, `"bar_blink"`
 -- @return true
@@ -215,7 +215,7 @@ function M.visible_applys()
   return M.visibles(_visible_stack[#_visible_stack])
 end
 
---- Returns the ansi sequence to show/hide the cursor at the top of the stack, and writes it to the terminal (+flush).
+--- Returns the ansi sequence to show/hide the cursor at the top of the stack, and writes it to the terminal.
 -- @return true
 -- @within cursor_shape_stack
 function M.visible_apply()
@@ -232,7 +232,7 @@ function M.visible_pushs(visible)
   return M.visible_applys()
 end
 
---- Pushes a cursor visibility onto the stack, and writes it to the terminal (+flush).
+--- Pushes a cursor visibility onto the stack, and writes it to the terminal.
 -- @tparam boolean visible true to show, false to hide
 -- @return true
 -- @within cursor_shape_stack
@@ -253,7 +253,7 @@ function M.visible_pops(n)
   return M.visible_applys()
 end
 
---- Pops `n` cursor visibility(ies) off the stack, and writes the last one to the terminal (+flush).
+--- Pops `n` cursor visibility(ies) off the stack, and writes the last one to the terminal.
 -- @tparam[opt=1] number n number of visibilities to pop
 -- @return true
 -- @within cursor_shape_stack
@@ -277,7 +277,7 @@ function M.shape_applys()
   return _shapestack[#_shapestack]
 end
 
---- Re-applies the shape at the top of the stack, and writes it to the terminal (+flush).
+--- Re-applies the shape at the top of the stack, and writes it to the terminal.
 -- @return true
 -- @within cursor_shape_stack
 function M.shape_apply()
@@ -295,7 +295,7 @@ function M.shape_pushs(shape)
   return M.shape_applys()
 end
 
---- Pushes a cursor shape onto the stack, and writes it to the terminal (+flush).
+--- Pushes a cursor shape onto the stack, and writes it to the terminal.
 -- @tparam string shape the shape to push, one of the keys `"block"`,
 -- `"block_blink"`, `"underline"`, `"underline_blink"`, `"bar"`, `"bar_blink"`
 -- @return true
@@ -317,7 +317,7 @@ function M.shape_pops(n)
   return M.shape_applys()
 end
 
---- Pops `n` cursor shape(s) off the stack, and writes the last one to the terminal (+flush).
+--- Pops `n` cursor shape(s) off the stack, and writes the last one to the terminal.
 -- @tparam[opt=1] number n number of shapes to pop
 -- @return true
 -- @within cursor_shape_stack
@@ -420,7 +420,7 @@ function M.cursor_saves()
   return "\27[s"
 end
 
---- Writes the ansi sequence to store the current cursor position (in terminal storage, not stacked) to the terminal (+flush).
+--- Writes the ansi sequence to store the current cursor position (in terminal storage, not stacked) to the terminal.
 -- @return true
 -- @within cursor_position
 function M.cursor_save()
@@ -435,7 +435,7 @@ function M.cursor_restores()
   return "\27[u"
 end
 
---- Writes the ansi sequence to restore the cursor position (from the terminal storage, not stacked) to the terminal (+flush).
+--- Writes the ansi sequence to restore the cursor position (from the terminal storage, not stacked) to the terminal.
 -- @return true
 -- @within cursor_position
 function M.cursor_restore()
@@ -452,7 +452,7 @@ function M.cursor_sets(row, column)
   return "\27[" .. tostring(row) .. ";" .. tostring(column) .. "H"
 end
 
---- Sets the cursor position and writes it to the terminal (+flush), without pushing onto the stack.
+--- Sets the cursor position and writes it to the terminal, without pushing onto the stack.
 -- @tparam number row
 -- @tparam number column
 -- @return true
@@ -482,7 +482,7 @@ function M.cursor_pushs(row, column)
   return M.cursor_sets(row, column)
 end
 
---- Pushes the current cursor position onto the stack, and writes an ansi sequence to move to the new position to the terminal (+flush).
+--- Pushes the current cursor position onto the stack, and writes an ansi sequence to move to the new position to the terminal.
 -- Calls cursor.get() under the hood.
 -- @tparam number row
 -- @tparam number column
@@ -510,7 +510,7 @@ function M.cursor_pops(n)
   return M.cursor_sets(entry[1], entry[2])
 end
 
---- Pops the last n cursor position off the stack, and writes an ansi sequence to move to the last one to the terminal (+flush).
+--- Pops the last n cursor position off the stack, and writes an ansi sequence to move to the last one to the terminal.
 -- @tparam[opt=1] number n number of positions to pop
 -- @return true
 -- @within cursor_position_stack
@@ -535,7 +535,7 @@ function M.cursor_ups(n)
   return "\27["..tostring(n).."A"
 end
 
---- Moves the cursor up and writes it to the terminal (+flush).
+--- Moves the cursor up and writes it to the terminal.
 -- @tparam[opt=1] number n number of lines to move up
 -- @return true
 -- @within cursor_moving
@@ -553,7 +553,7 @@ function M.cursor_downs(n)
   return "\27["..tostring(n).."B"
 end
 
---- Moves the cursor down and writes it to the terminal (+flush).
+--- Moves the cursor down and writes it to the terminal.
 -- @tparam[opt=1] number n number of lines to move down
 -- @return true
 -- @within cursor_moving
@@ -574,7 +574,7 @@ function M.cursor_verticals(n)
   return "\27[" .. (n < 0 and (tostring(-n) .. "A") or (tostring(n) .. "B"))
 end
 
---- Moves the cursor vertically and writes it to the terminal (+flush).
+--- Moves the cursor vertically and writes it to the terminal.
 -- @tparam[opt=1] number n number of lines to move (negative for up, positive for down)
 -- @return true
 -- @within cursor_moving
@@ -592,7 +592,7 @@ function M.cursor_lefts(n)
   return "\27["..tostring(n).."D"
 end
 
---- Moves the cursor left and writes it to the terminal (+flush).
+--- Moves the cursor left and writes it to the terminal.
 -- @tparam[opt=1] number n number of columns to move left
 -- @return true
 -- @within cursor_moving
@@ -610,7 +610,7 @@ function M.cursor_rights(n)
   return "\27["..tostring(n).."C"
 end
 
---- Moves the cursor right and writes it to the terminal (+flush).
+--- Moves the cursor right and writes it to the terminal.
 -- @tparam[opt=1] number n number of columns to move right
 -- @return true
 -- @within cursor_moving
@@ -631,7 +631,7 @@ function M.cursor_horizontals(n)
   return "\27[" .. (n < 0 and (tostring(-n) .. "D") or (tostring(n) .. "C"))
 end
 
---- Moves the cursor horizontally and writes it to the terminal (+flush).
+--- Moves the cursor horizontally and writes it to the terminal.
 -- @tparam[opt=1] number n number of columns to move (negative for left, positive for right)
 -- @return true
 -- @within cursor_moving
@@ -649,7 +649,7 @@ function M.cursor_moves(rows, columns)
   return M.cursor_verticals(rows or 0) .. M.cursor_horizontals(columns or 0)
 end
 
---- Moves the cursor horizontal and vertical and writes it to the terminal (+flush).
+--- Moves the cursor horizontal and vertical and writes it to the terminal.
 -- @tparam[opt=0] number rows number of rows to move (negative for up, positive for down)
 -- @tparam[opt=0] number columns number of columns to move (negative for left, positive for right)
 -- @return true
@@ -667,7 +667,7 @@ function M.cursor_tocolumns(column)
   return "\27["..tostring(column).."G"
 end
 
---- Moves the cursor to a column on the current row and writes it to the terminal (+flush).
+--- Moves the cursor to a column on the current row and writes it to the terminal.
 -- @tparam number column the column to move to
 -- @return true
 -- @within cursor_moving
@@ -684,7 +684,7 @@ function M.cursor_torows(row)
   return "\27["..tostring(row).."d"
 end
 
---- Moves the cursor to a row on the current column and writes it to the terminal (+flush).
+--- Moves the cursor to a row on the current column and writes it to the terminal.
 -- @tparam number row the row to move to
 -- @return true
 -- @within cursor_moving
@@ -701,7 +701,7 @@ function M.cursor_row_downs(rows)
   return "\27["..tostring(rows or 1).."E"
 end
 
---- Moves the cursor to the start of the next row and writes it to the terminal (+flush).
+--- Moves the cursor to the start of the next row and writes it to the terminal.
 -- @tparam[opt=1] number rows the number of rows to move down
 -- @return true
 -- @within cursor_moving
@@ -718,7 +718,7 @@ function M.cursor_row_ups(rows)
   return "\27["..tostring(rows or 1).."F"
 end
 
---- Moves the cursor to the start of the previous row and writes it to the terminal (+flush).
+--- Moves the cursor to the start of the previous row and writes it to the terminal.
 -- @tparam[opt=1] number rows the number of rows to move up
 -- @return true
 -- @within cursor_moving
@@ -742,7 +742,7 @@ function M.clears()
   return "\27[2J"
 end
 
---- Clears the screen and writes it to the terminal (+flush).
+--- Clears the screen and writes it to the terminal.
 -- @return true
 -- @within clearing
 function M.clear()
@@ -757,7 +757,7 @@ function M.clear_tops()
   return "\27[1J"
 end
 
---- Clears the screen from the cursor position to the left and top and writes it to the terminal (+flush).
+--- Clears the screen from the cursor position to the left and top and writes it to the terminal.
 -- @return true
 -- @within clearing
 function M.clear_top()
@@ -772,7 +772,7 @@ function M.clear_bottoms()
   return "\27[0J"
 end
 
---- Clears the screen from the cursor position to the right and bottom and writes it to the terminal (+flush).
+--- Clears the screen from the cursor position to the right and bottom and writes it to the terminal.
 -- @return true
 -- @within clearing
 function M.clear_bottom()
@@ -787,7 +787,7 @@ function M.clear_lines()
   return "\27[2K"
 end
 
---- Clears the line and writes it to the terminal (+flush).
+--- Clears the line and writes it to the terminal.
 -- @return true
 -- @within clearing
 function M.clear_line()
@@ -802,7 +802,7 @@ function M.clear_starts()
   return "\27[1K"
 end
 
---- Clears the line from the cursor position to the left and writes it to the terminal (+flush).
+--- Clears the line from the cursor position to the left and writes it to the terminal.
 -- @return true
 -- @within clearing
 function M.clear_start()
@@ -817,7 +817,7 @@ function M.clear_ends()
   return "\27[0K"
 end
 
---- Clears the line from the cursor position to the right and writes it to the terminal (+flush).
+--- Clears the line from the cursor position to the right and writes it to the terminal.
 -- @return true
 -- @within clearing
 function M.clear_end()
@@ -837,7 +837,7 @@ function M.clear_boxs(height, width)
   return line_next:rep(height - 1) .. line .. M.cursor_ups(height - 1)
 end
 
---- Clears a box from the cursor position (top-left) and writes it to the terminal (+flush).
+--- Clears a box from the cursor position (top-left) and writes it to the terminal.
 -- Cursor will return to the original position.
 -- @tparam number height the height of the box in rows
 -- @tparam number width the width of the box in columns
@@ -873,7 +873,7 @@ function M.scroll_regions(top, bottom)
   return "\27["..tostring(top)..";"..tostring(bottom).."r"
 end
 
---- Sets the scroll region and writes it to the terminal (+flush).
+--- Sets the scroll region and writes it to the terminal.
 -- If no arguments are given, it resets the scroll region to the whole screen.
 -- @tparam number top top row of the scroll region
 -- @tparam number bottom bottom row of the scroll region
@@ -893,7 +893,7 @@ function M.scroll_ups(n)
   return "\27["..tostring(n).."S"
 end
 
---- Scrolls the screen up and writes it to the terminal (+flush).
+--- Scrolls the screen up and writes it to the terminal.
 -- @tparam[opt=1] number n number of lines to scroll up
 -- @return true
 -- @within scrolling
@@ -911,7 +911,7 @@ function M.scroll_downs(n)
   return "\27["..tostring(n).."T"
 end
 
---- Scrolls the screen down and writes it to the terminal (+flush).
+--- Scrolls the screen down and writes it to the terminal.
 -- @tparam[opt=1] number n number of lines to scroll down
 -- @return true
 -- @within scrolling
@@ -931,7 +931,7 @@ function M.scroll_s(n)
   return "\27[" .. (n < 0 and (tostring(-n) .. "S") or (tostring(n) .. "T"))
 end
 
---- Scrolls the screen vertically and writes it to the terminal (+flush).
+--- Scrolls the screen vertically and writes it to the terminal.
 -- @tparam[opt=0] number n number of lines to scroll (negative for up, positive for down)
 -- @return true
 -- @within scrolling
@@ -954,7 +954,7 @@ function M.scroll_applys()
   return _scrollstack[#_scrollstack]
 end
 
---- Applies the scroll region at the top of the stack, and writes it to the terminal (+flush).
+--- Applies the scroll region at the top of the stack, and writes it to the terminal.
 -- @return true
 -- @within scrolling_region
 function M.scroll_apply()
@@ -973,7 +973,7 @@ function M.scroll_pushs(top, bottom)
   return M.scroll_applys()
 end
 
---- Pushes a new scroll region onto the stack, and writes it to the terminal (+flush).
+--- Pushes a new scroll region onto the stack, and writes it to the terminal.
 -- If no arguments are given, it resets the scroll region to the whole screen.
 -- @tparam number top top row of the scroll region
 -- @tparam number bottom bottom row of the scroll region
@@ -996,7 +996,7 @@ function M.scroll_pops(n)
   return M.scroll_applys()
 end
 
---- Pops `n` scroll region(s) off the stack, and writes the last to the terminal (+flush).
+--- Pops `n` scroll region(s) off the stack, and writes the last to the terminal.
 -- @tparam[opt=1] number n number of scroll regions to pop
 -- @return true
 -- @within scrolling_region
@@ -1113,7 +1113,7 @@ function M.color_fgs(r, g, b)
   return colorcode(r, g, b, true)
 end
 
---- Sets the foreground color and writes it to the terminal (+flush).
+--- Sets the foreground color and writes it to the terminal.
 -- @tparam integer r in case of RGB, the red value, a number for extended colors, a string color for base-colors
 -- @tparam[opt] number g in case of RGB, the green value
 -- @tparam[opt] number b in case of RGB, the blue value
@@ -1134,7 +1134,7 @@ function M.color_bgs(r, g, b)
   return colorcode(r, g, b, false)
 end
 
---- Sets the background color and writes it to the terminal (+flush).
+--- Sets the background color and writes it to the terminal.
 -- @tparam integer r in case of RGB, the red value, a number for extended colors, a string color for base-colors
 -- @tparam[opt] number g in case of RGB, the green value
 -- @tparam[opt] number b in case of RGB, the blue value
@@ -1152,7 +1152,7 @@ function M.underline_ons()
   return underline_on
 end
 
---- Sets the underline attribute and writes it to the terminal (+flush).
+--- Sets the underline attribute and writes it to the terminal.
 -- @return true
 -- @within textcolor
 function M.underline_on()
@@ -1167,7 +1167,7 @@ function M.underline_offs()
   return underline_off
 end
 
---- Unsets the underline attribute and writes it to the terminal (+flush).
+--- Unsets the underline attribute and writes it to the terminal.
 -- @return true
 -- @within textcolor
 function M.underline_off()
@@ -1182,7 +1182,7 @@ function M.blink_ons()
   return blink_on
 end
 
---- Sets the blink attribute and writes it to the terminal (+flush).
+--- Sets the blink attribute and writes it to the terminal.
 -- @return true
 -- @within textcolor
 function M.blink_on()
@@ -1197,7 +1197,7 @@ function M.blink_offs()
   return blink_off
 end
 
---- Unsets the blink attribute and writes it to the terminal (+flush).
+--- Unsets the blink attribute and writes it to the terminal.
 -- @return true
 -- @within textcolor
 function M.blink_off()
@@ -1212,7 +1212,7 @@ function M.reverse_ons()
   return reverse_on
 end
 
---- Sets the reverse attribute and writes it to the terminal (+flush).
+--- Sets the reverse attribute and writes it to the terminal.
 -- @return true
 -- @within textcolor
 function M.reverse_on()
@@ -1227,7 +1227,7 @@ function M.reverse_offs()
   return reverse_off
 end
 
---- Unsets the reverse attribute and writes it to the terminal (+flush).
+--- Unsets the reverse attribute and writes it to the terminal.
 -- @return true
 -- @within textcolor
 function M.reverse_off()
@@ -1298,7 +1298,7 @@ function M.brightnesss(brightness)
   return _brightness_sequence[_brightness[brightness]]
 end
 
---- Sets the brightness and writes it to the terminal (+flush).
+--- Sets the brightness and writes it to the terminal.
 -- @tparam string|integer brightness the brightness to set
 -- @return true
 -- @within textcolor
@@ -1352,7 +1352,7 @@ function M.textsets(attr)
   return new.ansi
 end
 
---- Sets the text attributes and writes it to the terminal (+flush).
+--- Sets the text attributes and writes it to the terminal.
 -- Every element omitted in the `attr` table will be taken from the current top of the stack.
 -- @tparam table attr the attributes to set, see `textsets` for details.
 -- @return true
@@ -1373,7 +1373,7 @@ function M.textpushs(attr)
   return new.ansi
 end
 
---- Pushes the current attributes onto the stack, and writes an ansi sequence to set the new attributes to the terminal (+flush).
+--- Pushes the current attributes onto the stack, and writes an ansi sequence to set the new attributes to the terminal.
 -- Every element omitted in the `attr` table will be taken from the current top of the stack.
 -- @tparam table attr the attributes to set, see `textsets` for details.
 -- @return true
@@ -1396,7 +1396,7 @@ function M.textpops(n)
   return _colorstack[#_colorstack].ansi
 end
 
---- Pops n attributes off the stack, and writes the last one to the terminal (+flush).
+--- Pops n attributes off the stack, and writes the last one to the terminal.
 -- @tparam[opt=1] number n number of attributes to pop
 -- @return true
 -- @within textcolor
@@ -1412,7 +1412,7 @@ function M.textapplys()
   return _colorstack[#_colorstack].ansi
 end
 
---- Re-applies the current attributes, and writes it to the terminal (+flush).
+--- Re-applies the current attributes, and writes it to the terminal.
 -- @return true
 -- @within textcolor
 function M.textapply()
@@ -1443,7 +1443,7 @@ function M.line_horizontals(n, char)
   return char:rep(math.floor(n / w))
 end
 
---- Draws a horizontal line and writes it to the terminal (+flush).
+--- Draws a horizontal line and writes it to the terminal.
 -- Line is drawn left to right.
 -- Returned sequence might be shorter than requested if the character is a multi-byte character
 -- and the number of columns is not a multiple of the character width.
@@ -1471,7 +1471,7 @@ function M.line_verticals(n, char, lastcolumn)
   return (char .. M.cursor_lefts(w-lastcolumn*2) .. M.cursor_downs(1)):rep(n-1) .. char
 end
 
---- Draws a vertical line and writes it to the terminal (+flush).
+--- Draws a vertical line and writes it to the terminal.
 -- Line is drawn top to bottom. Cursor is left to the right of the last character (so not below it).
 -- @tparam number n number of rows/lines to draw
 -- @tparam[opt="│"] string char the character to draw
@@ -1526,7 +1526,7 @@ function M.line_titles(width, title, char, pre, post)
   end
 end
 
---- Draws a horizontal line with a title centered in it and writes it to the terminal (+flush).
+--- Draws a horizontal line with a title centered in it and writes it to the terminal.
 -- Line is drawn left to right. If the width is too small for the title, the title is truncated with "trailing `"..."`.
 -- If less than 4 characters are available for the title, the title is omitted alltogether.
 -- @tparam string title the title to draw
@@ -1656,7 +1656,7 @@ function M.boxs(height, width, format, clear, title, lastcolumn)
   return table.concat(r)
 end
 
---- Draws a box and writes it to the terminal (+flush).
+--- Draws a box and writes it to the terminal.
 -- @tparam number height the height of the box in rows
 -- @tparam number width the width of the box in columns
 -- @tparam table format the format for the box, see `boxs` for details.

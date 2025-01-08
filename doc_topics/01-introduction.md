@@ -1,6 +1,6 @@
 # 1. Introduction
 
-Yet another terminal library, why? Becasue it adds a couple of things not found with other libraries.
+Yet another terminal library, why? Becasue it adds a couple of things not found with other libraries:
 
 - Also works on Windows (since it builds on top of `luasystem`)
 - Has `stacks` to track settings so it becomes possible to revert to previous settings, even if a piece of code has no knowledge about those settings.
@@ -13,7 +13,7 @@ There are 2 major concepts implemented in this library:
 - [functions vs strings](#12-functions-vs-strings)
 - [stacks](#13-stacks)
 
-And then there is the design of the [text attributes](#)
+And then there is the design of the [text attributes](#14-text-attributes)
 
 ## 1.2 functions vs strings
 
@@ -22,16 +22,16 @@ Almost every function in this library also has a string-counterpart. That would 
 - `clear_end()` and `clear_ends()`
 - `shape(<cursor-shape>)` and `shapes(<cursor-shape>)`
 
-The difference being that the former will immediately print the sequence, and flush it to the terminal. Where the latter only returns the sequence as a string, and leaves writing and flushing to the user.
+The difference being that the former will immediately print the sequence. Where the latter only returns the sequence as a string, and leaves writing to the user.
 
 Hence these 2 examples are identical in functionality:
 
     local t = require "terminal"
 
-    -- directly write and flush
+    -- directly write
     t.shape("block_blink")
 
-    -- manually write and flush
+    -- manually write
     t.write(t.shapes("block_blink"))
     t.flush()
 
@@ -89,7 +89,7 @@ Each stack has the following operations:
 
 - **`push(values...)`**: takes value(s) for the specific stack, pushes it onto the stack, and applies it.
 - **`pop(n)`**: pops `n` items of the stack, and applies the top of the stack again.
-- **`apply()`**: applies the last item on the stack (eg. undoes any intermediate changes).
+- **`apply()`**: applies the item at the top of the stack (eg. undoes any intermediate changes).
 
 The cursor position stack operates as follows:
 
@@ -98,8 +98,11 @@ The cursor position stack operates as follows:
 
 ## 1.4 Text attributes
 
-Text attributes ar emanaged as a set of multiple values. These include:
+Text attributes are managed as a set of multiple values. These include:
 
 - **foreground color**: in base-color, extended colors (255), or RGB colors (3x 255).
 - **background color**: in base-color, extended colors (255), or RGB colors (3x 255).
 - **brightness**: A combination of "invisible", "dim", none and "bright/bold" attributes.
+- **underline**: boolean to control underlining.
+- **blink**: boolean to control blinking.
+- **reverse**: boolean to control reversing.

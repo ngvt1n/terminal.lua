@@ -1,3 +1,6 @@
+-- This example writes a testscreen (background filled with numbers) and then
+-- writes a box with a message inside.
+
 local sys = require("system")
 local t = require("terminal")
 
