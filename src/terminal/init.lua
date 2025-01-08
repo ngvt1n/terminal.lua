@@ -13,8 +13,16 @@
 -- - most functions have 2 implementations: plain and with a trailing `s`, eg. `cursor_up` and
 --   `cursor_ups`. The plain version writes to the terminal, the `s` version returns the ansi
 --   sequence as a string without writing it.
--- - functions that change the terminal state (like cursor position, visibility, etc) have a stack
+-- - functions that change the terminal state (like cursor position, visibility, etc) also have a stack
 --   based version, allowing for easy push/pop operations.
+--
+-- Stacks:
+--
+-- - cursor visibility stack
+-- - cursor shape stack
+-- - cursor position stack
+-- - scroll region stack
+-- - text attributes stack (colors, bold, underline, etc)
 --
 -- @copyright Copyright (c) 2024-2024 Thijs Schreijer
 -- @author Thijs Schreijer
@@ -148,7 +156,6 @@ end
 -- @within cursor_shapes
 function M.visible(visible)
   M.write(M.visibles(visible))
-  t:flush()
   return true
 end
 
@@ -186,7 +193,6 @@ end
 -- @within cursor_shapes
 function M.shape(shape)
   M.write(shapes[shape])
-  t:flush()
   return true
 end
 
@@ -214,7 +220,6 @@ end
 -- @within cursor_shape_stack
 function M.visible_apply()
   M.write(M.visible_applys())
-  t:flush()
   return true
 end
 
@@ -233,7 +238,6 @@ end
 -- @within cursor_shape_stack
 function M.visible_push(visible)
   M.write(M.visible_pushs(visible))
-  t:flush()
   return true
 end
 
@@ -255,7 +259,6 @@ end
 -- @within cursor_shape_stack
 function M.visible_pop(n)
   M.write(M.visible_pops(n))
-  t:flush()
   return true
 end
 
@@ -279,7 +282,6 @@ end
 -- @within cursor_shape_stack
 function M.shape_apply()
   M.write(_shapestack[#_shapestack])
-  t:flush()
   return true
 end
 
@@ -300,7 +302,6 @@ end
 -- @within cursor_shape_stack
 function M.shape_push(shape)
   M.write(M.shape_pushs(shape))
-  t:flush()
   return true
 end
 
@@ -322,7 +323,6 @@ end
 -- @within cursor_shape_stack
 function M.shape_pop(n)
   M.write(M.shape_pops(n))
-  t:flush()
   return true
 end
 
@@ -425,7 +425,6 @@ end
 -- @within cursor_position
 function M.cursor_save()
   M.write(M.cursor_saves())
-  t:flush()
   return true
 end
 
@@ -441,7 +440,6 @@ end
 -- @within cursor_position
 function M.cursor_restore()
   M.write(M.cursor_restores())
-  t:flush()
   return true
 end
 
@@ -461,7 +459,6 @@ end
 -- @within cursor_position
 function M.cursor_set(row, column)
   M.write(M.cursor_sets(row, column))
-  t:flush()
   return true
 end
 
@@ -493,7 +490,6 @@ end
 -- @within cursor_position_stack
 function M.cursor_push(row, column)
   M.write(M.cursor_pushs(row, column))
-  t:flush()
   return true
 end
 
@@ -520,7 +516,6 @@ end
 -- @within cursor_position_stack
 function M.cursor_pop(n)
   M.write(M.cursor_pops(n))
-  t:flush()
   return true
 end
 
@@ -546,7 +541,6 @@ end
 -- @within cursor_moving
 function M.cursor_up(n)
   M.write(M.cursor_ups(n))
-  t:flush()
   return true
 end
 
@@ -565,7 +559,6 @@ end
 -- @within cursor_moving
 function M.cursor_down(n)
   M.write(M.cursor_downs(n))
-  t:flush()
   return true
 end
 
@@ -587,7 +580,6 @@ end
 -- @within cursor_moving
 function M.cursor_vertical(n)
   M.write(M.cursor_verticals(n))
-  t:flush()
   return true
 end
 
@@ -606,7 +598,6 @@ end
 -- @within cursor_moving
 function M.cursor_left(n)
   M.write(M.cursor_lefts(n))
-  t:flush()
   return true
 end
 
@@ -625,7 +616,6 @@ end
 -- @within cursor_moving
 function M.cursor_right(n)
   M.write(M.cursor_rights(n))
-  t:flush()
   return true
 end
 
@@ -647,7 +637,6 @@ end
 -- @within cursor_moving
 function M.cursor_horizontal(n)
   M.write(M.cursor_horizontals(n))
-  t:flush()
   return true
 end
 
@@ -667,7 +656,6 @@ end
 -- @within cursor_moving
 function M.cursor_move(rows, columns)
   M.write(M.cursor_moves(rows, columns))
-  t:flush()
   return true
 end
 
@@ -690,7 +678,6 @@ end
 -- @within clearing
 function M.clear()
   M.write(M.clears())
-  t:flush()
   return true
 end
 
@@ -706,7 +693,6 @@ end
 -- @within clearing
 function M.clear_top()
   M.write(M.clear_tops())
-  t:flush()
   return true
 end
 
@@ -722,7 +708,6 @@ end
 -- @within clearing
 function M.clear_bottom()
   M.write(M.clear_bottoms())
-  t:flush()
   return true
 end
 
@@ -738,7 +723,6 @@ end
 -- @within clearing
 function M.clear_line()
   M.write(M.clear_lines())
-  t:flush()
   return true
 end
 
@@ -754,7 +738,6 @@ end
 -- @within clearing
 function M.clear_start()
   M.write(M.clear_starts())
-  t:flush()
   return true
 end
 
@@ -770,7 +753,6 @@ end
 -- @within clearing
 function M.clear_end()
   M.write(M.clear_ends())
-  t:flush()
   return true
 end
 
@@ -794,7 +776,6 @@ end
 -- @within clearing
 function M.clear_box(height, width)
   M.write(M.clear_boxs(height, width))
-  t:flush()
   return true
 end
 
@@ -831,7 +812,6 @@ end
 -- @within scrolling
 function M.scroll_region(top, bottom)
   M.write(M.scroll_regions(top, bottom))
-  t:flush()
   return true
 end
 
@@ -850,7 +830,6 @@ end
 -- @within scrolling
 function M.scroll_up(n)
   M.write(M.scroll_ups(n))
-  t:flush()
   return true
 end
 
@@ -869,7 +848,6 @@ end
 -- @within scrolling
 function M.scroll_down(n)
   M.write(M.scroll_downs(n))
-  t:flush()
   return true
 end
 
@@ -890,7 +868,6 @@ end
 -- @within scrolling
 function M.scroll_(n)
   M.write(M.scroll_s(n))
-  t:flush()
   return true
 end
 
@@ -913,7 +890,6 @@ end
 -- @within scrolling_region
 function M.scroll_apply()
   M.write(_scrollstack[#_scrollstack])
-  t:flush()
   return true
 end
 
@@ -936,7 +912,6 @@ end
 -- @within scrolling_region
 function M.scroll_push(top, bottom)
   M.write(M.scroll_pushs(top, bottom))
-  t:flush()
   return true
 end
 
@@ -958,7 +933,6 @@ end
 -- @within scrolling_region
 function M.scroll_pop(n)
   M.write(M.scroll_pops(n))
-  t:flush()
   return true
 end
 
@@ -1078,7 +1052,6 @@ end
 -- @within textcolor
 function M.color_fg(r, g, b)
   M.write(M.color_fgs(r, g, b))
-  t:flush()
   return true
 end
 
@@ -1100,7 +1073,6 @@ end
 -- @within textcolor
 function M.color_bg(r, g, b)
   M.write(M.color_bgs(r, g, b))
-  t:flush()
   return true
 end
 
@@ -1116,7 +1088,6 @@ end
 -- @within textcolor
 function M.underline_on()
   M.write(M.underline_ons())
-  t:flush()
   return true
 end
 
@@ -1132,7 +1103,6 @@ end
 -- @within textcolor
 function M.underline_off()
   M.write(M.underline_offs())
-  t:flush()
   return true
 end
 
@@ -1148,7 +1118,6 @@ end
 -- @within textcolor
 function M.blink_on()
   M.write(M.blink_ons())
-  t:flush()
   return true
 end
 
@@ -1164,7 +1133,6 @@ end
 -- @within textcolor
 function M.blink_off()
   M.write(M.blink_offs())
-  t:flush()
   return true
 end
 
@@ -1180,7 +1148,6 @@ end
 -- @within textcolor
 function M.reverse_on()
   M.write(M.reverse_ons())
-  t:flush()
   return true
 end
 
@@ -1196,7 +1163,6 @@ end
 -- @within textcolor
 function M.reverse_off()
   M.write(M.reverse_offs())
-  t:flush()
   return true
 end
 
@@ -1269,7 +1235,6 @@ end
 -- @within textcolor
 function M.brightness(brightness)
   M.write(M.brightnesss(brightness))
-  t:flush()
   return true
 end
 
@@ -1325,7 +1290,6 @@ end
 -- @within textcolor
 function M.textset(attr)
   M.write(newtext(attr).ansi)
-  t:flush()
   return true
 end
 
@@ -1347,7 +1311,6 @@ end
 -- @within textcolor
 function M.textpush(attr)
   M.write(M.textpushs(attr))
-  t:flush()
   return true
 end
 
@@ -1370,7 +1333,6 @@ end
 -- @within textcolor
 function M.textpop(n)
   M.write(M.textpops(n))
-  t:flush()
   return true
 end
 
@@ -1386,7 +1348,6 @@ end
 -- @within textcolor
 function M.textapply()
   M.write(_colorstack[#_colorstack].ansi)
-  t:flush()
   return true
 end
 
@@ -1423,7 +1384,6 @@ end
 -- @within lines
 function M.line_horizontal(n, char)
   M.write(M.line_horizontals(n, char))
-  t:flush()
   return true
 end
 
@@ -1450,7 +1410,6 @@ end
 -- @within lines
 function M.line_vertical(n, char)
   M.write(M.line_verticals(n, char))
-  t:flush()
   return true
 end
 
@@ -1510,7 +1469,6 @@ end
 -- @within lines
 function M.line_title(title, width, char, pre, post)
   M.write(M.line_titles(title, width, char, pre, post))
-  t:flush()
   return true
 end
 
@@ -1640,7 +1598,6 @@ end
 -- @within lines
 function M.box(height, width, format, clear, title, lastcolumn)
   M.write(M.boxs(height, width, format, clear, title, lastcolumn))
-  t:flush()
   return true
 end
 
@@ -1710,7 +1667,7 @@ function M.shutdown()
     M.write(
       M.shape_pops(math.huge),
       M.visible_pops(math.huge),
-      -- M.textpops(math.huge),
+      M.textpops(math.huge),
       M.scroll_pops(math.huge)
     )
     t:flush()
