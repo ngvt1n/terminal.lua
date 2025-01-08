@@ -56,7 +56,7 @@ local t -- the terminal/stream to operate on, default io.stdout
 -- @section stream
 
 do
-  local chunksize = 1024 -- chunk size to write in one go
+  local chunksize = 512 -- chunk size to write in one go
   local bytecount_left = chunksize -- number of bytes to write before flush+sleep required
   local delay = 0.001 -- delay in seconds after each chunk write
 
@@ -392,7 +392,7 @@ local new_readansi, old_readansi do
 
     -- read response
     while true do
-      local seq, typ, part = old_readansi(0)
+      local seq, typ, part = old_readansi(0.5) -- 500ms timeout, max time for terminal to respond
       if seq == nil and typ == "timeout" then
         error("no response from terminal, this is unexpected")
       end
@@ -476,7 +476,7 @@ end
 -- @treturn string ansi sequence to write to the terminal
 -- @within cursor_position_stack
 function M.cursor_pushs(row, column)
-  local r, c = M.cursor.get()
+  local r, c = M.cursor_get()
   -- ignore the error, since we need to keep the stack in sync for pop/push operations
   _positionstack[#_positionstack + 1] = { r, c }
   return M.cursor_sets(row, column)
