@@ -6,23 +6,7 @@
 -- It provides a simple and consistent interface to the terminal, allowing for cursor positioning,
 -- cursor shape and visibility, text formatting, clearing the screen, scrolling, and more.
 --
--- Design:
---
--- - `initialize` and `shutdown` functions are provided to setup and teardown the terminal.
--- - `print` and `write` functions that protect against buffer overruns (causing dropped data).
--- - most functions have 2 implementations: plain and with a trailing `s`, eg. `cursor_up` and
---   `cursor_ups`. The plain version writes to the terminal, the `s` version returns the ansi
---   sequence as a string without writing it.
--- - functions that change the terminal state (like cursor position, visibility, etc) also have a stack
---   based version, allowing for easy push/pop operations.
---
--- Stacks:
---
--- - cursor visibility stack
--- - cursor shape stack
--- - cursor position stack
--- - scroll region stack
--- - text attributes stack (colors, bold, underline, etc)
+-- For generic instruction please read the [introduction](topics/01-introduction.md.html).
 --
 -- @copyright Copyright (c) 2024-2024 Thijs Schreijer
 -- @author Thijs Schreijer
@@ -1308,6 +1292,13 @@ function M.brightness(brightness)
 end
 
 
+--=============================================================================
+-- text_stack: colors & attributes
+--=============================================================================
+-- Text colors and attributes stack.
+-- Stack for managing the text color and attributes.
+-- @section textcolor_stack
+
 
 local function newtext(attr)
   local last = _colorstack[#_colorstack]
@@ -1346,7 +1337,7 @@ end
 -- @tparam[opt] boolean attr.blink whether to set blink
 -- @tparam[opt] boolean attr.reverse whether to set reverse
 -- @treturn string ansi sequence to write to the terminal
--- @within textcolor
+-- @within textcolor_stack
 function M.textsets(attr)
   local new = newtext(attr)
   return new.ansi
@@ -1356,7 +1347,7 @@ end
 -- Every element omitted in the `attr` table will be taken from the current top of the stack.
 -- @tparam table attr the attributes to set, see `textsets` for details.
 -- @return true
--- @within textcolor
+-- @within textcolor_stack
 function M.textset(attr)
   M.write(newtext(attr).ansi)
   return true
@@ -1366,7 +1357,7 @@ end
 -- Every element omitted in the `attr` table will be taken from the current top of the stack.
 -- @tparam table attr the attributes to set, see `textsets` for details.
 -- @treturn string ansi sequence to write to the terminal
--- @within textcolor
+-- @within textcolor_stack
 function M.textpushs(attr)
   local new = newtext(attr)
   _colorstack[#_colorstack + 1] = new
@@ -1377,7 +1368,7 @@ end
 -- Every element omitted in the `attr` table will be taken from the current top of the stack.
 -- @tparam table attr the attributes to set, see `textsets` for details.
 -- @return true
--- @within textcolor
+-- @within textcolor_stack
 function M.textpush(attr)
   M.write(M.textpushs(attr))
   return true
@@ -1386,7 +1377,7 @@ end
 --- Pops n attributes off the stack (and returns the last one), without writing it to the terminal.
 -- @tparam[opt=1] number n number of attributes to pop
 -- @treturn string ansi sequence to write to the terminal
--- @within textcolor
+-- @within textcolor_stack
 function M.textpops(n)
   n = n or 1
   local newtop = math.max(#_colorstack - n, 1)
@@ -1399,7 +1390,7 @@ end
 --- Pops n attributes off the stack, and writes the last one to the terminal.
 -- @tparam[opt=1] number n number of attributes to pop
 -- @return true
--- @within textcolor
+-- @within textcolor_stack
 function M.textpop(n)
   M.write(M.textpops(n))
   return true
@@ -1407,14 +1398,14 @@ end
 
 --- Re-applies the current attributes (returns it, does not write it to the terminal).
 -- @treturn string ansi sequence to write to the terminal
--- @within textcolor
+-- @within textcolor_stack
 function M.textapplys()
   return _colorstack[#_colorstack].ansi
 end
 
 --- Re-applies the current attributes, and writes it to the terminal.
 -- @return true
--- @within textcolor
+-- @within textcolor_stack
 function M.textapply()
   M.write(_colorstack[#_colorstack].ansi)
   return true
