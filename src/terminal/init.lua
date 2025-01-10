@@ -1724,11 +1724,13 @@ function M.shutdown()
     assert(termbackup, "terminal not initialized")
 
     -- restore all stacks
+    local r,c = M.cursor_get() -- Mac: scroll-region reset changes cursor pos to 1,1, so store it
     M.write(
       M.shape_pops(math.huge),
       M.visible_pops(math.huge),
       M.textpops(math.huge),
-      M.scroll_pops(math.huge)
+      M.scroll_pops(math.huge),
+      M.cursor_sets(r,c) -- restore cursor pos
     )
     t:flush()
 
