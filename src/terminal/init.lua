@@ -1088,6 +1088,12 @@ local function colorcode(r, g, b, fg)
 end
 
 --- Creates an ansi sequence to set the foreground color without writing it to the terminal.
+-- This function takes three color types:
+--
+-- 1. base colors: black, red, green, yellow, blue, magenta, cyan, white. Use as `color_fgs("red")`.
+-- 2. extended colors: a number between 0 and 255. Use as `color_fgs(123)`.
+-- 3. RGB colors: three numbers between 0 and 255. Use as `color_fgs(123, 123, 123)`.
+--
 -- @tparam integer r in case of RGB, the red value, a number for extended colors, a string color for base-colors
 -- @tparam[opt] number g in case of RGB, the green value
 -- @tparam[opt] number b in case of RGB, the blue value
@@ -1109,6 +1115,12 @@ function M.color_fg(r, g, b)
 end
 
 --- Creates an ansi sequence to set the background color without writing it to the terminal.
+-- This function takes three color types:
+--
+-- 1. base colors: black, red, green, yellow, blue, magenta, cyan, white. Use as `color_bgs("red")`.
+-- 2. extended colors: a number between 0 and 255. Use as `color_bgs(123)`.
+-- 3. RGB colors: three numbers between 0 and 255. Use as `color_bgs(123, 123, 123)`.
+--
 -- @tparam integer r in case of RGB, the red value, a number for extended colors, a string color for base-colors
 -- @tparam[opt] number g in case of RGB, the green value
 -- @tparam[opt] number b in case of RGB, the blue value
