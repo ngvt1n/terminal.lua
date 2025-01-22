@@ -33,6 +33,7 @@ build = {
 
   modules = {
     ["terminal.init"] = "src/terminal/init.lua",
+    ["terminal.progress"] = "src/terminal/progress.lua",
   },
 
   copy_directories = {
