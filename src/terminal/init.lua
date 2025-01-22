@@ -30,6 +30,54 @@ end
 local sys = require "system"
 local t -- the terminal/stream to operate on, default io.stdout
 
+--=============================================================================
+-- Sequence object
+--=============================================================================
+
+do
+  local S = {}
+  S.__index = S
+
+  -- concat all entries, whilst executing the functions
+  S.__tostring = function(self)
+    local result = {}
+    for i, item in ipairs(self) do
+      if type(item) == "function" then
+        item = item()
+      end
+      result[i] = tostring(item)
+    end
+    return table.concat(result)
+  end
+
+  -- concat 2 sequences, by copying both into a new sequence
+  S.__add = function(self, other)
+    local result = {}
+    for i, item in ipairs(self) do
+      result[i] = item
+    end
+    if getmetatable(other) == S then
+      -- another sequence, copy all items
+      for i, item in ipairs(other) do
+        result[#result + 1] = item
+      end
+    else
+      result[#result + 1] = other
+    end
+    return setmetatable(result, S)
+  end
+
+  --- Create a new sequence object.
+  -- A sequence object is an array of items, where each item can be a string or a function.
+  -- When the sequence is converted to a string, the functions are executed and their return
+  -- value is used.
+  -- This allows for dynamic use of the "stack" based functions
+  -- @param ... the items to add to the sequence
+  -- @treturn table the sequence object
+  function M.sequence(...)
+    return setmetatable(pack(...), S)
+  end
+end
 
 --=============================================================================
 -- Stream support
@@ -48,6 +96,10 @@ do
   -- Parameters are written to the stream, and flushed after each chunk. A small sleep is
   -- added after each chunk to allow the terminal to process the data.
   -- This is done to prevent the terminal buffer from overrunning and dropping data.
+  --
+  -- Important differences:
+  -- - functions will be called and their first return value will be used.
+  -- - parameters will be written without tabs separating them.
   -- @param ... the values to write
   -- @return the return value of the stream's `write` function
   -- @within stream
@@ -61,9 +113,13 @@ do
 
     local data = {...}
     for i = 1, count do
-      data[i] = tostring(data[i])
+      local d = data[i]
+      if type(d) == "function" then
+        d = d()
+      end
+      data[i] = tostring(d)
     end
-    data = table.concat(data, "\t")
+    data = table.concat(data)
 
     -- write to stream, in chunks. flush and sleep in between
     while #data > 0 do
@@ -484,7 +540,7 @@ end
 function M.cursor_pops(n)
   n = n or 1
   local entry
-  while n > 1 do
+  while n > 0 do
     entry = table.remove(_positionstack)
     n = n - 1
   end
@@ -1675,11 +1731,17 @@ end
 
 
 --=============================================================================
--- terminal initialization and exit
+-- terminal initialization, shutdown and miscellanea
 --=============================================================================
 --- Initialization.
 -- Initialization and termination.
 -- @section initialization
+
+function M.beep()
+  M.write("\a")
+  return true
+end
+
 
 do
   local termbackup
@@ -1687,19 +1749,24 @@ do
   local savescreen = "\27[?1049h" -- save cursor pos + switch to alternate screen buffer
   local restorescreen = "\27[?1049l" -- restore cursor pos + switch to main screen buffer
 
+  --- Returns whether the terminal has been initialized and is ready for use.
+  -- @treturn boolean true if the terminal has been initialized
+  function M.ready()
+    return termbackup ~= nil
+  end
 
   --- Initializes the terminal for use.
   -- Makes a backup of the current terminal settings.
   -- Sets input to non-blocking, disables canonical mode and echo, and enables ANSI processing.
   -- @tparam[opt=false] boolean displaybackup if true, the current terminal display is also
   -- backed up (by switching to the alternate screen buffer).
-  -- @tparam[opt=io.stdout] filehandle filehandle the stream to use for output
+  -- @tparam[opt=io.stderr] filehandle filehandle the stream to use for output
   -- @return true
   -- @within initialization
   function M.initialize(displaybackup, filehandle)
-    assert(not termbackup, "terminal already initialized")
+    assert(not M.ready(), "terminal already initialized")
 
-    filehandle = filehandle or io.stdout
+    filehandle = filehandle or io.stderr
     assert(io.type(filehandle) == 'file', "invalid file handle")
     t = filehandle
 
@@ -1732,8 +1799,8 @@ do
   --- Shuts down the terminal, restoring the terminal settings.
   -- @return true
   -- @within initialization
-function M.shutdown()
-    assert(termbackup, "terminal not initialized")
+  function M.shutdown()
+    assert(M.ready(), "terminal not initialized")
 
     -- restore all stacks
     local r,c = M.cursor_get() -- Mac: scroll-region reset changes cursor pos to 1,1, so store it
