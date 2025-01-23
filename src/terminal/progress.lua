@@ -117,4 +117,28 @@ function M.spinner(opts)
   end
 end
 
+
+
+--- Create a text/led ticker like sprite-sequence for use with a progress spinner.
+-- @tparam string text the text to display
+-- @tparam[opt=40] number width the width of the ticker, in characters
+-- @tparam[opt=""] string text_done the text to display when the spinner is done
+-- @treturn table a table of sprites to use with a spinner
+function M.ticker(text, width, text_done)
+  -- TODO: make it UTF-8 aware, and char-display-width aware
+  assert(text, "text must be provided")
+  width = width or 40
+  text_done = text_done or ""
+
+  local base = (" "):rep(width) .. text .. (" "):rep(width)
+  local result = { [0] = (text_done .. (" "):rep(width)):sub(1,width) }
+  for i = 1, width + #text do
+    result[i] = base:sub(i, i + width - 1)
+  end
+
+  return result
+end
+
+
+
 return M

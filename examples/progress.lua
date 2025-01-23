@@ -19,7 +19,7 @@ for name, seq in pairs(p.sprites) do
   print("     "..name) -- create a line for display
   lst[#lst+1] = name
 end
-print("                                                       <-- custom one")
+print("                                                       <-- ticker type")
 
 -- create all spinners with fixed positions (positions are optional)
 local r, _ = t.cursor_get()
@@ -39,16 +39,10 @@ for i, name in ipairs(lst) do
   }
 end
 
--- add the custom one last
-local text = "please wait..."
-local width = 30
-local base = (" "):rep(width) .. text .. (" "):rep(width)
-local custom = { [0] = ("Done!" .. (" "):rep(width)):sub(1,width) }
-for i = 1, width + #text do
-  custom[i] = base:sub(i, i + width - 1)
-end
+
+-- add the ticker one last
 spinners[#spinners+1] = p.spinner {
-  sprites = custom,
+  sprites = p.ticker("please wait...", 30, "Done!"),
   col = 1,
   row = r - 1,
   textattr = {fg = "black", bg = "red", brightness = "normal"},
