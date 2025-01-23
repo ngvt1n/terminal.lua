@@ -1758,6 +1758,9 @@ do
   --- Initializes the terminal for use.
   -- Makes a backup of the current terminal settings.
   -- Sets input to non-blocking, disables canonical mode and echo, and enables ANSI processing.
+  -- The preferred way to initialize the terminal is through `initwrap`, since that ensures settings
+  -- are properly restored in case of an error, and don't leave the terminal in an inconsistent state
+  -- for the user after exit.
   -- @tparam[opt=false] boolean displaybackup if true, the current terminal display is also
   -- backed up (by switching to the alternate screen buffer).
   -- @tparam[opt=io.stderr] filehandle filehandle the stream to use for output
@@ -1828,6 +1831,30 @@ do
 
     return true
   end
+end
+
+
+
+--- Wrap a function in initialize and shutdown calls.
+-- When an error occurs, and the application exits, the terminal might not be properly shut down.
+-- This function wraps a function in calls to `initialize` and `shutdown`, ensuring the terminal is properly shut down.
+-- @tparam function main the function to wrap
+-- @param ... any parameters to pass to `initialize`
+-- @treturn any the return values of the wrapped function, or nil+err in case of an error
+function M.initwrap(main, ...)
+  M.initialize(...)
+
+  local results
+  local ok, err = xpcall(function(...)
+    results = pack(main())
+  end, debug.traceback, ...)
+
+  M.shutdown()
+
+  if not ok then
+    return nil, err
+  end
+  return unpack(results)
 end
 
 

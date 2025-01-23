@@ -6,71 +6,71 @@ local t = require("terminal")
 local p = require("terminal.progress")
 
 
--- initialize terminal
-t.initialize()
+local function main()
+  -- create one of each spinners
+  local spinners = {}
 
-
--- create one of each spinners
-local spinners = {}
-
--- create room to display the spinners
-local lst = {}
-for name, seq in pairs(p.sprites) do
-  print("     "..name) -- create a line for display
-  lst[#lst+1] = name
-end
-print("                                                       <-- ticker type")
-
--- create all spinners with fixed positions (positions are optional)
-local r, _ = t.cursor_get()
-for i, name in ipairs(lst) do
-  local done_sprite, done_textattr
-  if i <= #lst/2 then
-    -- set done to checkmark character for the first half of the spinners
-    done_sprite = "✔  "
-    done_textattr = {fg = "green", brightness = 3}
+  -- create room to display the spinners
+  local lst = {}
+  for name, seq in pairs(p.sprites) do
+    print("     "..name) -- create a line for display
+    lst[#lst+1] = name
   end
+  print("                                                       <-- ticker type")
+
+  -- create all spinners with fixed positions (positions are optional)
+  local r, _ = t.cursor_get()
+  for i, name in ipairs(lst) do
+    local done_sprite, done_textattr
+    if i <= #lst/2 then
+      -- set done to checkmark character for the first half of the spinners
+      done_sprite = "✔  "
+      done_textattr = {fg = "green", brightness = 3}
+    end
+    spinners[#spinners+1] = p.spinner {
+      sprites = p.sprites[name],
+      col = 1,
+      row = r - #lst - 2 + i,
+      done_textattr = done_textattr,
+      done_sprite = done_sprite,
+    }
+  end
+
+
+  -- add the ticker one last
   spinners[#spinners+1] = p.spinner {
-    sprites = p.sprites[name],
+    sprites = p.ticker("please wait...", 30, "Done!"),
     col = 1,
-    row = r - #lst - 2 + i,
-    done_textattr = done_textattr,
-    done_sprite = done_sprite,
+    row = r - 1,
+    textattr = {fg = "black", bg = "red", brightness = "normal"},
+    done_textattr = {brightness = "high"},
   }
-end
 
 
--- add the ticker one last
-spinners[#spinners+1] = p.spinner {
-  sprites = p.ticker("please wait...", 30, "Done!"),
-  col = 1,
-  row = r - 1,
-  textattr = {fg = "black", bg = "red", brightness = "normal"},
-  done_textattr = {brightness = "high"},
-}
+  t.write("Press any key to stop the spinners...")
+  t.visible(false)
 
 
-t.write("Press any key to stop the spinners...")
-t.visible(false)
+  -- loop until key-pressed
+  while true do
+    for _, s in ipairs(spinners) do
+      s()
+    end
+    t.flush()
+    if sys.readansi(0.02) then
+      break -- a key was pressed
+    end
+  end
 
-
--- loop until key-pressed
-while true do
+  -- mark spinners done
   for _, s in ipairs(spinners) do
-    s()
+    s(true)
   end
-  t.flush()
-  if sys.readansi(0.02) then
-    break -- a key was pressed
-  end
+  t.visible(true)
+  t.print() -- move to new line (we're still on the 'press any key' line)
+
+  return true
 end
 
--- mark spinners done
-for _, s in ipairs(spinners) do
-  s(true)
-end
-t.visible(true)
-t.print() -- move to new line (we're still on the 'press any key' line)
-
--- restore all settings
-t.shutdown()
+-- run the main function, wrapped in terminal init/shutdown
+assert(t.initwrap(main))
