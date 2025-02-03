@@ -33,6 +33,7 @@ build = {
 
   modules = {
     ["terminal.init"] = "src/terminal/init.lua",
+    ["terminal.width"] = "src/terminal/width.lua",
     ["terminal.progress"] = "src/terminal/progress.lua",
   },
 
