@@ -1,4 +1,18 @@
 --- Module to check and validate character display widths.
+-- Not all characters are displayed with the same width on the terminal.
+-- The Unicode standard defines the width of many characters, but not all.
+-- Especially the ['ambiguous width'](https://www.unicode.org/Public/UCD/latest/ucd/EastAsianWidth.txt)
+-- characters can be displayed with different
+-- widths especially when used with East Asian languages.
+--
+-- This module provides functions to check the width of characters and strings.
+-- This is done by writing them to the terminal and recording the change in
+-- cursor position. The width is then stored in a cache, so subsequent calls
+-- with the same character will be faster.
+--
+-- It is possible to preload the cache with the widths of a lot of characters at
+-- once. This can be done with the `preload` function. This is preferred since it
+-- is (a lot) faster than checking each character individually.
 
 local M = {}
 local char_widths = {} -- registry to keep track of already tested widths
@@ -26,9 +40,13 @@ end
 -- Writes a character to the terminal and returns its width in columns.
 -- The width measured is recorded in the cache, so subsequent calls with the
 -- same character will be faster.
--- @tparam string char the character to write, a single utf8 character
+-- @tparam string|number char the character to write, a single utf8 character, or codepoint
 -- @treturn number the width of the character in columns
 function M.write_cwidth(char)
+  if type(char) == "number" then
+    char = utf8.char(char)
+  end
+
   local w = char_widths[char]
   if w then
     -- we have a cached width
@@ -59,9 +77,13 @@ end
 -- change the background color. So set that accordingly to avoid unwanted effects.
 -- The width measured is recorded in the cache, so subsequent calls with the
 -- same character will be faster.
--- @tparam string char the character to write, a single utf8 character
+-- @tparam string|number char the character to test, a single utf8 character, or codepoint
 -- @treturn number the width of the character in columns
 function M.get_cwidth(char)
+  if type(char) == "number" then
+    char = utf8.char(char)
+  end
+
   local w = char_widths[char]
   if w then
     return w
@@ -79,6 +101,8 @@ end
 -- the widths of a string, without actually showing it on the terminal.
 -- Same as `write_swidth`, but uses `get_cwidth` so it will not really show on
 -- the terminal. The cursor is returned to its original position.
+-- @tparam string str the string to test
+-- @treturn number the width of the string in columns
 function M.get_swidth(str)
   local w = 0
   for pos, codepoint in utf8.codes(str) do
@@ -90,11 +114,15 @@ end
 --- Returns the width of a character in columns, matches `sys.utf8cwidth`.
 -- This will check the cache of recorded widths first, and if not found,
 -- use `sys.utf8cwidth` to determine the width.
--- @tparam string char the character to check
+-- @tparam string|number char the character (string or codepoint) to check
 -- @treturn number the width of the first character in columns
 function M.utf8cwidth(char)
-  char = utf8.char(utf8.codepoint(char))
-  return char_widths[char] or sys.utf8cwidth(char)
+  if type(char) == "string" then
+    char = utf8.codepoint(char)
+  elseif type(char) ~= "number" then
+    error("expected string or number, got " .. type(char), 2)
+  end
+  return char_widths[utf8.char(char)] or sys.utf8cwidth(char)
 end
 
 --- Returns the width of a string in columns, matches `sys.utf8swidth`.
@@ -108,6 +136,72 @@ function M.utf8swidth(str)
     w = w + M.utf8cwidth(char)
   end
   return w
+end
+
+--- Preload the cache with the widths of all characters in the string.
+-- Characters will be written 'invisible', so it does not show on the terminal.
+-- It will read many character-widths at once, and hence is a lot faster than checking
+-- each character individually.
+-- @tparam string str the string of characters to preload
+-- @treturn[1] boolean true if successful
+-- @treturn[2] nil
+-- @treturn[2] string error message
+function M.preload(str)
+  local size = 50 -- max number of characters to do in 1 terminal write
+  local test = {}
+  local dup = {}
+  for pos, char in utf8.codes(str) do
+    char = utf8.char(char) -- convert back to utf8 string
+    if not (char_widths[char] or dup[char]) then
+      test[#test+1] = char
+      dup[char] = true
+    end
+  end
+
+  if #test == 0 then
+    return -- nothing to test
+  end
+
+  t.textpush({ brightness = 0 }) -- set color to "hidden"
+
+  local r, c = t.cursor_get() -- retrieve current position
+  local setpos = t.cursor_sets(r, c) -- string to restore cursor to current position
+  local getpos = t._cursor_get_writes() -- string to inject query for current position
+  local chunk = {}
+  local chars = {}
+  for i = 1, #test do -- process in chunks of max size
+    chars[#chars+1] = test[i]
+    local s = test[i] -- the character
+              .. getpos -- query for new position
+              .. setpos -- restore cursor to current position
+    chunk[#chunk+1] = s
+    if #chunk == size or i == #test then
+      -- handle the chunk
+      t.write(table.concat(chunk))
+      local positions, err = t._cursor_get(#chunk)
+      if not positions then
+        t.textpop() -- restore color (drop hidden)
+        return nil, err
+      end
+
+      -- record sizes reported
+      for j, pos in ipairs(positions) do
+        local w = pos[2] - c
+        if w < 0 then
+          -- cursor wrapped to next line
+          local _, cols = t.termsize()
+          w = w + cols
+        end
+        char_widths[chars[j]] = w
+      end
+
+      chunk = {} -- clear for next chunk
+      chars = {}
+    end
+  end
+
+  t.textpop() -- restore color (drop hidden)
+  return true
 end
 
 return M
