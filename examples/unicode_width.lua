@@ -24,7 +24,7 @@ local function test()
 end
 
 
-assert(t.initwrap(function()
+assert(t.initwrap({}, function()
   pr = p.sprites.bar_horizontal
   pr[0] = "✔"
   test()

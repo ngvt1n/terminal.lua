@@ -72,4 +72,4 @@ local function main()
 end
 
 -- run the main function, wrapped in terminal init/shutdown
-assert(t.initwrap(main))
+assert(t.initwrap({}, main))
