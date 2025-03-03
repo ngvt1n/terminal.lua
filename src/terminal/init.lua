@@ -28,7 +28,9 @@ end
 
 
 local sys = require "system"
-local t -- the terminal/stream to operate on, default io.stdout
+local t -- the terminal/stream to operate on, default io.stderr
+local bsleep  -- a blocking sleep function
+local asleep   -- a (optionally) non-blocking sleep function
 
 --=============================================================================
 -- Sequence object
@@ -135,7 +137,7 @@ do
       if bytecount_left <= 0 then
         bytecount_left = chunksize
         t:flush()
-        sys.sleep(delay) -- sleep a bit to allow the terminal to process the data
+        bsleep(delay) -- (blocking) sleep a bit to allow the terminal to process the data
       end
     end
 
@@ -377,14 +379,22 @@ end
 local _positionstack = {}
 
 
-local new_readansi, old_readansi do
+do
   local kbbuffer = {}
   local kbstart = 0
   local kbend = 0
+  local sys_readansi = sys.readansi
 
-  old_readansi = sys.readansi
-
-  function new_readansi(timeout)
+  --- Same as `sys.readansi`, but works with the buffer required by `terminal.lua`.
+  -- This function will read from the buffer first, before calling `sys.readansi`. This is
+  -- required because querying the terminal (e.g. getting cursor position) might read data
+  -- from the keyboard buffer, which would be lost if not buffered. Hence this function
+  -- must be used instead of `sys.readansi`, to ensure the previously read buffer is
+  -- consumed first.
+  -- @tparam number timeout the timeout in seconds
+  -- @tparam[opt] function fsleep the sleep function to use (default: the sleep function
+  -- set by `initialize`)
+  function M.readansi(timeout, fsleep)
     if kbend ~= 0 then
       -- we have buffered input
       kbstart = kbstart + 1
@@ -396,14 +406,14 @@ local new_readansi, old_readansi do
       end
       return unpack(res)
     end
-    return old_readansi(timeout)
+    return sys_readansi(timeout, fsleep or asleep)
   end
 
 
   -- prereads all of the keyboard buffer into the cache
   function M._cursor_get_prep()
     while true do
-      local seq, typ, part = old_readansi(0)
+      local seq, typ, part = sys_readansi(0, bsleep)
       if seq == nil and typ == "timeout" then
         return true
       end
@@ -434,7 +444,7 @@ local new_readansi, old_readansi do
     -- read responses
     local result = {}
     while true do
-      local seq, typ, part = old_readansi(0.5) -- 500ms timeout, max time for terminal to respond
+      local seq, typ, part = sys_readansi(0.5, bsleep) -- 500ms timeout, max time for terminal to respond
       if seq == nil and typ == "timeout" then
         error("no response from terminal, this is unexpected")
       end
@@ -1804,20 +1814,35 @@ do
   -- The preferred way to initialize the terminal is through `initwrap`, since that ensures settings
   -- are properly restored in case of an error, and don't leave the terminal in an inconsistent state
   -- for the user after exit.
-  -- @tparam[opt=false] boolean displaybackup if true, the current terminal display is also
+  -- @tparam[opt] table opts options table, with keys:
+  -- @tparam[opt=false] boolean opts.displaybackup if true, the current terminal display is also
   -- backed up (by switching to the alternate screen buffer).
-  -- @tparam[opt=io.stderr] filehandle filehandle the stream to use for output
+  -- @tparam[opt=io.stderr] filehandle opts.filehandle the stream to use for output
+  -- @tparam[opt=sys.sleep] function opts.bsleep the blocking sleep function to use.
+  -- This should never be set to a yielding sleep function! This function
+  -- will be used by the `terminal.write` and `terminal.print` to prevent buffer-overflows and
+  -- truncation when writing to the terminal. And by `cursor_get` when reading the cursor position.
+  -- @tparam[opt=sys.sleep] function opts.sleep the default sleep function to use for `readansi`.
+  -- In an async application (coroutines), this should be a yielding sleep function, eg. `copas.pause`.
   -- @return true
   -- @within initialization
-  function M.initialize(displaybackup, filehandle)
+  function M.initialize(opts)
     assert(not M.ready(), "terminal already initialized")
 
-    filehandle = filehandle or io.stderr
-    assert(io.type(filehandle) == 'file', "invalid file handle")
+    opts = opts or {}
+    assert(type(opts) == "table", "expected opts to be a table, got " .. type(opts))
+
+    local filehandle = opts.filehandle or io.stderr
+    assert(io.type(filehandle) == 'file', "invalid opts.filehandle")
     t = filehandle
 
+    bsleep = opts.bsleep or sys.sleep
+    assert(type(bsleep) == "function", "invalid opts.bsleep function, expected a function, got " .. type(opts.bsleep))
+    asleep = opts.sleep or sys.sleep
+    assert(type(asleep) == "function", "invalid opts.sleep function, expected a function, got " .. type(opts.sleep))
+
     termbackup = sys.termbackup()
-    if displaybackup then
+    if opts.displaybackup then
       M.write(savescreen)
       termbackup.displaybackup = true
     end
@@ -1835,9 +1860,6 @@ do
     })
     -- setup stdin to non-blocking mode
     sys.setnonblock(io.stdin, true)
-
-    -- set up keyboard buffering for cursor pos reading
-    sys.readansi = new_readansi
 
     return true
   end
@@ -1869,8 +1891,9 @@ do
     sys.termrestore(termbackup)
 
     t = nil
+    asleep = nil
+    bsleep = nil
     termbackup = nil
-    sys.readansi = old_readansi
 
     return true
   end
@@ -1878,25 +1901,32 @@ end
 
 
 
---- Wrap a function in initialize and shutdown calls.
+--- Wrap a function in `initialize` and `shutdown` calls.
 -- When an error occurs, and the application exits, the terminal might not be properly shut down.
 -- This function wraps a function in calls to `initialize` and `shutdown`, ensuring the terminal is properly shut down.
+-- @tparam[opt] table opts options table, to pass to `initialize`.
 -- @tparam function main the function to wrap
--- @param ... any parameters to pass to `initialize`
+-- @param ... any parameters to pass to the main function
 -- @treturn any the return values of the wrapped function, or nil+err in case of an error
--- @usage local function main()
---   -- you main app functionality here
+-- @within initialization
+-- @usage local function main(param1, param2)
+--   -- your main app functionality here
+--
+--   return true -- return truthy to pass assertion below
 -- end
 --
--- local target_stream = io.stderr
--- local display_backup = false
--- assert(t.initwrap(main, display_backup, target_stream))
-function M.initwrap(main, ...)
-  M.initialize(...)
+-- local opts = {
+--   filehandle = io.stderr,
+--   displaybackup = true,
+-- }
+-- assert(t.initwrap(opts, main, "one", "two")) -- assert to rethrow any error after termimal restore
+function M.initwrap(opts, main, ...)
+  assert(type(main) == "function", "expected main to be a function, got " .. type(main))
+  M.initialize(opts)
 
   local results
   local ok, err = xpcall(function(...)
-    results = pack(main())
+    results = pack(main(...))
   end, debug.traceback, ...)
 
   M.shutdown()
