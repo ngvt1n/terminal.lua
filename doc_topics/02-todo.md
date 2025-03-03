@@ -35,24 +35,21 @@ This means that input handling must be done in the library, since the default
 io.read functions etc wouldn't be able to read from the buffered data, they can only read
 from STDIN.
 
-terminal.lua currently patches `system.readansi` to inject this buffer. This works but
-is ugly and doesn't adhere to 'mechanisms over policies'. So the lib should probably
-just provide its own `readansi` and leave patching to the user.
+terminal.lua currently provides its own `readansi` (matching `system.readansi`) to inject this buffer.
 
 # 2.2.1 thread safety
 
 a related problem to the reading+buffering from stdin issue is async safety.
 
-luasystem implements `readansi` by sleeping whilst there is no data. And it mentions
-that the `system.sleep` function should be patched by a yielding, coroutine aware version
-if async behvior is needed.
-
+Usually when using `readnsi` to read input we want to pass in a yielding-sleep, such that
+tasks in the background continue to run.
 This works nicely, except when querying the terminal. Because between sending the command
 and reading its response, we do not want an implicit yield to occur (and other threads running).
 So in those cases there must be a 'blocking' sleep, otherwise if multiple threads
 query the terminal at the same time, responses my be mixed.
 
-This might require a change to luasystem. for example by passing in the sleep method to use.
+the default sleep and a blocking sleep can be passed to `initialize` in this library.
+Does that need improvements?
 
 # 2.3 terminal output buffers
 
@@ -78,3 +75,8 @@ on the display.
 
 So far the only way to detect those widths is by writing them to the terminal, and record
 cursor displacement.
+
+# 2.5 library structure
+
+This library has a lot f functions in a single file. Would it improve usability if
+it were split into multiple files, each with its own focus?

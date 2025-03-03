@@ -1,0 +1,4211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>terminal docs</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>terminal.lua</h1>
+
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#stream">stream</a></li>
+<li><a href="#Cursor_shapes_and_visibility">Cursor shapes and visibility </a></li>
+<li><a href="#cursor_shapes">cursor_shapes</a></li>
+<li><a href="#cursor_shape_stack">cursor_shape_stack</a></li>
+<li><a href="#cursor_position">cursor_position</a></li>
+<li><a href="#cursor_position_stack">cursor_position_stack</a></li>
+<li><a href="#cursor_moving">cursor_moving</a></li>
+<li><a href="#clearing">clearing</a></li>
+<li><a href="#scrolling">scrolling</a></li>
+<li><a href="#scrolling_region">scrolling_region</a></li>
+<li><a href="#textcolor">textcolor</a></li>
+<li><a href="#textcolor_stack">textcolor_stack</a></li>
+<li><a href="#lines">lines</a></li>
+<li><a href="#initialization">initialization</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><strong>terminal</strong></li>
+  <li><a href="../modules/terminal.progress.html">terminal.progress</a></li>
+  <li><a href="../modules/terminal.width.html">terminal.width</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/01-introduction.md.html">1. Introduction</a></li>
+  <li><a href="../topics/02-todo.md.html">2. TODO items</a></li>
+  <li><a href="../topics/CHANGELOG.md.html">CHANGELOG</a></li>
+  <li><a href="../topics/LICENSE.md.html">MIT License</a></li>
+</ul>
+<h2>Examples</h2>
+<ul class="nowrap">
+  <li><a href="../examples/colors.lua.html">colors.lua</a></li>
+  <li><a href="../examples/progress.lua.html">progress.lua</a></li>
+  <li><a href="../examples/sequence.lua.html">sequence.lua</a></li>
+  <li><a href="../examples/testscreen.lua.html">testscreen.lua</a></li>
+  <li><a href="../examples/unicode_width.lua.html">unicode_width.lua</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>terminal</code></h1>
+<p>Terminal library for Lua.</p>
+<p> This terminal library builds upon the cross-platform terminal capabilities of LuaSystem. As such
+ it works modern terminals on Windows, Unix, and Mac systems.</p>
+
+<p> It provides a simple and consistent interface to the terminal, allowing for cursor positioning,
+ cursor shape and visibility, text formatting, clearing the screen, scrolling, and more.</p>
+
+<p> For generic instruction please read the <a href="topics/01-introduction.md.html">introduction</a>.</p>
+    <h3>Info:</h3>
+    <ul>
+        <li><strong>Copyright</strong>: Copyright (c) 2024-2024 Thijs Schreijer</li>
+        <li><strong>License</strong>: MIT, see <a href="../topics/LICENSE.md.html#">LICENSE.md</a>.</li>
+        <li><strong>Author</strong>: Thijs Schreijer</li>
+    </ul>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#sequence">sequence (...)</a></td>
+	<td class="summary">Create a new sequence object.</td>
+	</tr>
+</table>
+<h2><a href="#stream">stream</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#flush">flush ()</a></td>
+	<td class="summary">Flushes the stream.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#print">print (...)</a></td>
+	<td class="summary">Prints to the stream in chunks.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#write">write (...)</a></td>
+	<td class="summary">Writes to the stream in chunks.</td>
+	</tr>
+</table>
+<h2><a href="#Cursor_shapes_and_visibility">Cursor shapes and visibility </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#beep">beep ()</a></td>
+	<td class="summary">Write a sequence to the terminal to make it beep.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#beeps">beeps ()</a></td>
+	<td class="summary">Returns a string sequence to make the terminal beep.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#readansi">readansi (timeout[, fsleep])</a></td>
+	<td class="summary">Same as <code>sys.readansi</code>, but works with the buffer required by <code>terminal.lua</code>.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#ready">ready ()</a></td>
+	<td class="summary">Returns whether the terminal has been initialized and is ready for use.</td>
+	</tr>
+</table>
+<h2><a href="#cursor_shapes">cursor_shapes</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#shape">shape (shape)</a></td>
+	<td class="summary">Sets the cursor shape and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#shapes">shapes (shape)</a></td>
+	<td class="summary">Returns the ansi sequence for a cursor shape without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#visible">visible (visible)</a></td>
+	<td class="summary">Shows or hides the cursor and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#visibles">visibles (visible)</a></td>
+	<td class="summary">Returns the ansi sequence to show/hide the cursor without writing it to the terminal.</td>
+	</tr>
+</table>
+<h2><a href="#cursor_shape_stack">cursor_shape_stack</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#shape_apply">shape_apply ()</a></td>
+	<td class="summary">Re-applies the shape at the top of the stack, and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#shape_applys">shape_applys ()</a></td>
+	<td class="summary">Re-applies the shape at the top of the stack (returns it, does not write it to the terminal).</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#shape_pop">shape_pop ([n=1])</a></td>
+	<td class="summary">Pops <code>n</code> cursor shape(s) off the stack, and writes the last one to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#shape_pops">shape_pops ([n=1])</a></td>
+	<td class="summary">Pops <code>n</code> cursor shape(s) off the stack (and returns the last one), without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#shape_push">shape_push (shape)</a></td>
+	<td class="summary">Pushes a cursor shape onto the stack, and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#shape_pushs">shape_pushs (shape)</a></td>
+	<td class="summary">Pushes a cursor shape onto the stack (and returns it), without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#visible_apply">visible_apply ()</a></td>
+	<td class="summary">Returns the ansi sequence to show/hide the cursor at the top of the stack, and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#visible_applys">visible_applys ()</a></td>
+	<td class="summary">Returns the ansi sequence to show/hide the cursor at the top of the stack without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#visible_pop">visible_pop ([n=1])</a></td>
+	<td class="summary">Pops <code>n</code> cursor visibility(ies) off the stack, and writes the last one to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#visible_pops">visible_pops ([n=1])</a></td>
+	<td class="summary">Pops <code>n</code> cursor visibility(ies) off the stack (and returns the last one), without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#visible_push">visible_push (visible)</a></td>
+	<td class="summary">Pushes a cursor visibility onto the stack, and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#visible_pushs">visible_pushs (visible)</a></td>
+	<td class="summary">Pushes a cursor visibility onto the stack (and returns it), without writing it to the terminal.</td>
+	</tr>
+</table>
+<h2><a href="#cursor_position">cursor_position</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#cursor_get">cursor_get ()</a></td>
+	<td class="summary">Requests the current cursor position from the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_restore">cursor_restore ()</a></td>
+	<td class="summary">Writes the ansi sequence to restore the cursor position (from the terminal storage, not stacked) to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_restores">cursor_restores ()</a></td>
+	<td class="summary">Returns the ansi sequence to restore the cursor position (from the terminal storage, not stacked).</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_save">cursor_save ()</a></td>
+	<td class="summary">Writes the ansi sequence to store the current cursor position (in terminal storage, not stacked) to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_saves">cursor_saves ()</a></td>
+	<td class="summary">Returns the ansi sequence to store to backup the current sursor position (in terminal storage, not stacked).</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_set">cursor_set (row, column)</a></td>
+	<td class="summary">Sets the cursor position and writes it to the terminal, without pushing onto the stack.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_sets">cursor_sets (row, column)</a></td>
+	<td class="summary">Creates ansi sequence to set the cursor position without writing to the terminal or pushing onto the stack.</td>
+	</tr>
+</table>
+<h2><a href="#cursor_position_stack">cursor_position_stack</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#cursor_pop">cursor_pop ([n=1])</a></td>
+	<td class="summary">Pops the last n cursor position off the stack, and writes an ansi sequence to move to the last one to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_pops">cursor_pops ([n=1])</a></td>
+	<td class="summary">Pops the last n cursor positions off the stack, and returns an ansi sequence to move to the last one without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_push">cursor_push (row, column)</a></td>
+	<td class="summary">Pushes the current cursor position onto the stack, and writes an ansi sequence to move to the new position to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_pushs">cursor_pushs (row, column)</a></td>
+	<td class="summary">Pushes the current cursor position onto the stack, and returns an ansi sequence to move to the new position without writing it to the terminal.</td>
+	</tr>
+</table>
+<h2><a href="#cursor_moving">cursor_moving</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#cursor_down">cursor_down ([n=1])</a></td>
+	<td class="summary">Moves the cursor down and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_downs">cursor_downs ([n=1])</a></td>
+	<td class="summary">Creates an ansi sequence to move the cursor down without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_horizontal">cursor_horizontal ([n=1])</a></td>
+	<td class="summary">Moves the cursor horizontally and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_horizontals">cursor_horizontals ([n=1])</a></td>
+	<td class="summary">Creates an ansi sequence to move the cursor horizontally without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_left">cursor_left ([n=1])</a></td>
+	<td class="summary">Moves the cursor left and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_lefts">cursor_lefts ([n=1])</a></td>
+	<td class="summary">Creates an ansi sequence to move the cursor left without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_move">cursor_move ([rows=0[, columns=0]])</a></td>
+	<td class="summary">Moves the cursor horizontal and vertical and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_moves">cursor_moves ([rows=0[, columns=0]])</a></td>
+	<td class="summary">Creates an ansi sequence to move the cursor horizontal and vertical without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_right">cursor_right ([n=1])</a></td>
+	<td class="summary">Moves the cursor right and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_rights">cursor_rights ([n=1])</a></td>
+	<td class="summary">Creates an ansi sequence to move the cursor right without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_row_down">cursor_row_down ([rows=1])</a></td>
+	<td class="summary">Moves the cursor to the start of the next row and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_row_downs">cursor_row_downs ([rows=1])</a></td>
+	<td class="summary">Creates an ansi sequence to move the cursor to the start of the next row without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_row_up">cursor_row_up ([rows=1])</a></td>
+	<td class="summary">Moves the cursor to the start of the previous row and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_row_ups">cursor_row_ups ([rows=1])</a></td>
+	<td class="summary">Creates an ansi sequence to move the cursor to the start of the previous row without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_tocolumn">cursor_tocolumn (column)</a></td>
+	<td class="summary">Moves the cursor to a column on the current row and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_tocolumns">cursor_tocolumns (column)</a></td>
+	<td class="summary">Creates an ansi sequence to move the cursor to a column on the current row without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_torow">cursor_torow (row)</a></td>
+	<td class="summary">Moves the cursor to a row on the current column and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_torows">cursor_torows (row)</a></td>
+	<td class="summary">Creates an ansi sequence to move the cursor to a row on the current column without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_up">cursor_up ([n=1])</a></td>
+	<td class="summary">Moves the cursor up and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_ups">cursor_ups ([n=1])</a></td>
+	<td class="summary">Creates an ansi sequence to move the cursor up without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_vertical">cursor_vertical ([n=1])</a></td>
+	<td class="summary">Moves the cursor vertically and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor_verticals">cursor_verticals ([n=1])</a></td>
+	<td class="summary">Creates an ansi sequence to move the cursor vertically without writing it to the terminal.</td>
+	</tr>
+</table>
+<h2><a href="#clearing">clearing</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#clear">clear ()</a></td>
+	<td class="summary">Clears the screen and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#clear_bottom">clear_bottom ()</a></td>
+	<td class="summary">Clears the screen from the cursor position to the right and bottom and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#clear_bottoms">clear_bottoms ()</a></td>
+	<td class="summary">Creates an ansi sequence to clear the screen from the cursor position to the right and bottom without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#clear_box">clear_box (height, width)</a></td>
+	<td class="summary">Clears a box from the cursor position (top-left) and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#clear_boxs">clear_boxs (height, width)</a></td>
+	<td class="summary">Creates an ansi sequence to clear a box from the cursor position (top-left) without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#clear_end">clear_end ()</a></td>
+	<td class="summary">Clears the line from the cursor position to the right and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#clear_ends">clear_ends ()</a></td>
+	<td class="summary">Creates an ansi sequence to clear the line from the cursor position to the right without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#clear_line">clear_line ()</a></td>
+	<td class="summary">Clears the line and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#clear_lines">clear_lines ()</a></td>
+	<td class="summary">Creates an ansi sequence to clear the line without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#clear_start">clear_start ()</a></td>
+	<td class="summary">Clears the line from the cursor position to the left and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#clear_starts">clear_starts ()</a></td>
+	<td class="summary">Creates an ansi sequence to clear the line from the cursor position to the left without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#clear_top">clear_top ()</a></td>
+	<td class="summary">Clears the screen from the cursor position to the left and top and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#clear_tops">clear_tops ()</a></td>
+	<td class="summary">Creates an ansi sequence to clear the screen from the cursor position to the left and top without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#clears">clears ()</a></td>
+	<td class="summary">Creates an ansi sequence to clear the screen without writing it to the terminal.</td>
+	</tr>
+</table>
+<h2><a href="#scrolling">scrolling</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#scroll_">scroll_ ([n=0])</a></td>
+	<td class="summary">Scrolls the screen vertically and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#scroll_down">scroll_down ([n=1])</a></td>
+	<td class="summary">Scrolls the screen down and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#scroll_downs">scroll_downs ([n=1])</a></td>
+	<td class="summary">Creates an ansi sequence to scroll the screen down without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#scroll_region">scroll_region (top, bottom)</a></td>
+	<td class="summary">Sets the scroll region and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#scroll_regions">scroll_regions (top, bottom)</a></td>
+	<td class="summary">Creates an ansi sequence to set the scroll region without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#scroll_s">scroll_s ([n=0])</a></td>
+	<td class="summary">Creates an ansi sequence to scroll the screen vertically without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#scroll_up">scroll_up ([n=1])</a></td>
+	<td class="summary">Scrolls the screen up and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#scroll_ups">scroll_ups ([n=1])</a></td>
+	<td class="summary">Creates an ansi sequence to scroll the screen up without writing it to the terminal.</td>
+	</tr>
+</table>
+<h2><a href="#scrolling_region">scrolling_region</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#scroll_apply">scroll_apply ()</a></td>
+	<td class="summary">Applies the scroll region at the top of the stack, and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#scroll_applys">scroll_applys ()</a></td>
+	<td class="summary">Applies the scroll region at the top of the stack (returns it, does not write it to the terminal).</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#scroll_pop">scroll_pop ([n=1])</a></td>
+	<td class="summary">Pops <code>n</code> scroll region(s) off the stack, and writes the last to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#scroll_pops">scroll_pops ([n=1])</a></td>
+	<td class="summary">Pops <code>n</code> scroll region(s) off the stack (and returns the last), without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#scroll_push">scroll_push (top, bottom)</a></td>
+	<td class="summary">Pushes a new scroll region onto the stack, and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#scroll_pushs">scroll_pushs (top, bottom)</a></td>
+	<td class="summary">Pushes a new scroll region onto the stack (and returns it), without writing it to the terminal.</td>
+	</tr>
+</table>
+<h2><a href="#textcolor">textcolor</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#blink_off">blink_off ()</a></td>
+	<td class="summary">Unsets the blink attribute and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#blink_offs">blink_offs ()</a></td>
+	<td class="summary">Creates an ansi sequence to unset the blink attribute without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#blink_on">blink_on ()</a></td>
+	<td class="summary">Sets the blink attribute and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#blink_ons">blink_ons ()</a></td>
+	<td class="summary">Creates an ansi sequence to set the blink attribute without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#brightness">brightness (brightness)</a></td>
+	<td class="summary">Sets the brightness and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#brightnesss">brightnesss (brightness)</a></td>
+	<td class="summary">Creates an ansi sequence to set the brightness without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#color_bg">color_bg (r[, g[, b]])</a></td>
+	<td class="summary">Sets the background color and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#color_bgs">color_bgs (r[, g[, b]])</a></td>
+	<td class="summary">Creates an ansi sequence to set the background color without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#color_fg">color_fg (r[, g[, b]])</a></td>
+	<td class="summary">Sets the foreground color and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#color_fgs">color_fgs (r[, g[, b]])</a></td>
+	<td class="summary">Creates an ansi sequence to set the foreground color without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#reverse_off">reverse_off ()</a></td>
+	<td class="summary">Unsets the reverse attribute and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#reverse_offs">reverse_offs ()</a></td>
+	<td class="summary">Creates an ansi sequence to unset the reverse attribute without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#reverse_on">reverse_on ()</a></td>
+	<td class="summary">Sets the reverse attribute and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#reverse_ons">reverse_ons ()</a></td>
+	<td class="summary">Creates an ansi sequence to set the reverse attribute without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#underline_off">underline_off ()</a></td>
+	<td class="summary">Unsets the underline attribute and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#underline_offs">underline_offs ()</a></td>
+	<td class="summary">Creates an ansi sequence to unset the underline attribute without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#underline_on">underline_on ()</a></td>
+	<td class="summary">Sets the underline attribute and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#underline_ons">underline_ons ()</a></td>
+	<td class="summary">Creates an ansi sequence to set the underline attribute without writing it to the terminal.</td>
+	</tr>
+</table>
+<h2><a href="#textcolor_stack">textcolor_stack</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#textapply">textapply ()</a></td>
+	<td class="summary">Re-applies the current attributes, and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#textapplys">textapplys ()</a></td>
+	<td class="summary">Re-applies the current attributes (returns it, does not write it to the terminal).</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#textpop">textpop ([n=1])</a></td>
+	<td class="summary">Pops n attributes off the stack, and writes the last one to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#textpops">textpops ([n=1])</a></td>
+	<td class="summary">Pops n attributes off the stack (and returns the last one), without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#textpush">textpush (attr)</a></td>
+	<td class="summary">Pushes the current attributes onto the stack, and writes an ansi sequence to set the new attributes to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#textpushs">textpushs (attr)</a></td>
+	<td class="summary">Pushes the current attributes onto the stack, and returns an ansi sequence to set the new attributes without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#textset">textset (attr)</a></td>
+	<td class="summary">Sets the text attributes and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#textsets">textsets (attr)</a></td>
+	<td class="summary">Creates an ansi sequence to set the text attributes without writing it to the terminal.</td>
+	</tr>
+</table>
+<h2><a href="#lines">lines</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#box">box (height, width, format, clear[, title=""[, lastcolumn]])</a></td>
+	<td class="summary">Draws a box and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#box_fmt">box_fmt</a></td>
+	<td class="summary">Table with pre-defined box formats.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#box_fmt.copy">box_fmt.copy (default)</a></td>
+	<td class="summary">Copy a box format.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#boxs">boxs (height, width[, format[, clear=" "[, title=""[, lastcolumn=""]]]])</a></td>
+	<td class="summary">Creates a sequence to draw a box, without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#line_horizontal">line_horizontal (n[, char="─"])</a></td>
+	<td class="summary">Draws a horizontal line and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#line_horizontals">line_horizontals (n[, char="─"])</a></td>
+	<td class="summary">Creates a sequence to draw a horizontal line without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#line_title">line_title (title, width[, char="─"[, pre=""[, post=""]]])</a></td>
+	<td class="summary">Draws a horizontal line with a title centered in it and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#line_titles">line_titles (width[, title=""[, char="─"[, pre=""[, post=""]]]])</a></td>
+	<td class="summary">Creates a sequence to draw a horizontal line with a title centered in it without writing it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#line_vertical">line_vertical (n[, char="│"])</a></td>
+	<td class="summary">Draws a vertical line and writes it to the terminal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#line_verticals">line_verticals (n[, char="│"[, lastcolumn]])</a></td>
+	<td class="summary">Creates a sequence to draw a vertical line without writing it to the terminal.</td>
+	</tr>
+</table>
+<h2><a href="#initialization">initialization</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#initialize">initialize ([opts])</a></td>
+	<td class="summary">Initializes the terminal for use.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#initwrap">initwrap ([opts], main, ...)</a></td>
+	<td class="summary">Wrap a function in <a href="../modules/terminal.html#initialize">initialize</a> and <a href="../modules/terminal.html#shutdown">shutdown</a> calls.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#shutdown">shutdown ()</a></td>
+	<td class="summary">Shuts down the terminal, restoring the terminal settings.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "sequence"></a>
+    <strong>sequence (...)</strong>
+    </dt>
+    <dd>
+    Create a new sequence object.
+ A sequence object is an array of items, where each item can be a string or a function.
+ When the sequence is converted to a string, the functions are executed and their return
+ value is used.
+ This allows for dynamic use of the "stack" based functions
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">...</span>
+         the items to add to the sequence
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+        the sequence object
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="stream"></a>stream</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "flush"></a>
+    <strong>flush ()</strong>
+    </dt>
+    <dd>
+    Flushes the stream.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the return value of the stream's <a href="../modules/terminal.html#flush">flush</a> function
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "print"></a>
+    <strong>print (...)</strong>
+    </dt>
+    <dd>
+    Prints to the stream in chunks.
+ Same as <a href="../modules/terminal.html#write">write</a>, but adds a newline at the end.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">...</span>
+         the values to write
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the return value of the stream's <a href="../modules/terminal.html#write">write</a> function
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "write"></a>
+    <strong>write (...)</strong>
+    </dt>
+    <dd>
+    Writes to the stream in chunks.
+ Parameters are written to the stream, and flushed after each chunk. A small sleep is
+ added after each chunk to allow the terminal to process the data.
+ This is done to prevent the terminal buffer from overrunning and dropping data.</p>
+
+<p> Important differences:
+ - functions will be called and their first return value will be used.
+ - parameters will be written without tabs separating them.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">...</span>
+         the values to write
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the return value of the stream's <a href="../modules/terminal.html#write">write</a> function
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header has-description"><a name="Cursor_shapes_and_visibility"></a>Cursor shapes and visibility </h2>
+
+          <div class="section-description">
+           Managing the shape and visibility of the cursor. These functions just generate
+ required ansi sequences, without any stack operations.
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "beep"></a>
+    <strong>beep ()</strong>
+    </dt>
+    <dd>
+    Write a sequence to the terminal to make it beep.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "beeps"></a>
+    <strong>beeps ()</strong>
+    </dt>
+    <dd>
+    Returns a string sequence to make the terminal beep.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "readansi"></a>
+    <strong>readansi (timeout[, fsleep])</strong>
+    </dt>
+    <dd>
+    Same as <code>sys.readansi</code>, but works with the buffer required by <code>terminal.lua</code>.
+ This function will read from the buffer first, before calling <code>sys.readansi</code>. This is
+ required because querying the terminal (e.g. getting cursor position) might read data
+ from the keyboard buffer, which would be lost if not buffered. Hence this function
+ must be used instead of <code>sys.readansi</code>, to ensure the previously read buffer is
+ consumed first.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">timeout</span>
+            <span class="types"><span class="type">number</span></span>
+         the timeout in seconds
+        </li>
+        <li><span class="parameter">fsleep</span>
+            <span class="types"><span class="type">function</span></span>
+         the sleep function to use (default: the sleep function
+ set by <a href="../modules/terminal.html#initialize">initialize</a>)
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "ready"></a>
+    <strong>ready ()</strong>
+    </dt>
+    <dd>
+    Returns whether the terminal has been initialized and is ready for use.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        true if the terminal has been initialized
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="cursor_shapes"></a>cursor_shapes</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "shape"></a>
+    <strong>shape (shape)</strong>
+    </dt>
+    <dd>
+    Sets the cursor shape and writes it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">shape</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the shape to set, one of the keys <code>&quot;block&quot;</code>,
+ <code>&quot;block_blink&quot;</code>, <code>&quot;underline&quot;</code>, <code>&quot;underline_blink&quot;</code>, <code>&quot;bar&quot;</code>, <code>&quot;bar_blink&quot;</code>
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "shapes"></a>
+    <strong>shapes (shape)</strong>
+    </dt>
+    <dd>
+    Returns the ansi sequence for a cursor shape without writing it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">shape</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the shape to get, one of the keys <code>&quot;block&quot;</code>,
+ <code>&quot;block_blink&quot;</code>, <code>&quot;underline&quot;</code>, <code>&quot;underline_blink&quot;</code>, <code>&quot;bar&quot;</code>, <code>&quot;bar_blink&quot;</code>
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "visible"></a>
+    <strong>visible (visible)</strong>
+    </dt>
+    <dd>
+    Shows or hides the cursor and writes it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">visible</span>
+            <span class="types"><span class="type">boolean</span></span>
+         true to show, false to hide
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "visibles"></a>
+    <strong>visibles (visible)</strong>
+    </dt>
+    <dd>
+    Returns the ansi sequence to show/hide the cursor without writing it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">visible</span>
+            <span class="types"><span class="type">boolean</span></span>
+         true to show, false to hide
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="cursor_shape_stack"></a>cursor_shape_stack</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "shape_apply"></a>
+    <strong>shape_apply ()</strong>
+    </dt>
+    <dd>
+    Re-applies the shape at the top of the stack, and writes it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "shape_applys"></a>
+    <strong>shape_applys ()</strong>
+    </dt>
+    <dd>
+    Re-applies the shape at the top of the stack (returns it, does not write it to the terminal).
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "shape_pop"></a>
+    <strong>shape_pop ([n=1])</strong>
+    </dt>
+    <dd>
+    Pops <code>n</code> cursor shape(s) off the stack, and writes the last one to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of shapes to pop
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "shape_pops"></a>
+    <strong>shape_pops ([n=1])</strong>
+    </dt>
+    <dd>
+    Pops <code>n</code> cursor shape(s) off the stack (and returns the last one), without writing it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of shapes to pop
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "shape_push"></a>
+    <strong>shape_push (shape)</strong>
+    </dt>
+    <dd>
+    Pushes a cursor shape onto the stack, and writes it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">shape</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the shape to push, one of the keys <code>&quot;block&quot;</code>,
+ <code>&quot;block_blink&quot;</code>, <code>&quot;underline&quot;</code>, <code>&quot;underline_blink&quot;</code>, <code>&quot;bar&quot;</code>, <code>&quot;bar_blink&quot;</code>
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "shape_pushs"></a>
+    <strong>shape_pushs (shape)</strong>
+    </dt>
+    <dd>
+    Pushes a cursor shape onto the stack (and returns it), without writing it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">shape</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the shape to push, one of the keys <code>&quot;block&quot;</code>,
+ <code>&quot;block_blink&quot;</code>, <code>&quot;underline&quot;</code>, <code>&quot;underline_blink&quot;</code>, <code>&quot;bar&quot;</code>, <code>&quot;bar_blink&quot;</code>
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "visible_apply"></a>
+    <strong>visible_apply ()</strong>
+    </dt>
+    <dd>
+    Returns the ansi sequence to show/hide the cursor at the top of the stack, and writes it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "visible_applys"></a>
+    <strong>visible_applys ()</strong>
+    </dt>
+    <dd>
+    Returns the ansi sequence to show/hide the cursor at the top of the stack without writing it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "visible_pop"></a>
+    <strong>visible_pop ([n=1])</strong>
+    </dt>
+    <dd>
+    Pops <code>n</code> cursor visibility(ies) off the stack, and writes the last one to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of visibilities to pop
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "visible_pops"></a>
+    <strong>visible_pops ([n=1])</strong>
+    </dt>
+    <dd>
+    Pops <code>n</code> cursor visibility(ies) off the stack (and returns the last one), without writing it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of visibilities to pop
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "visible_push"></a>
+    <strong>visible_push (visible)</strong>
+    </dt>
+    <dd>
+    Pushes a cursor visibility onto the stack, and writes it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">visible</span>
+            <span class="types"><span class="type">boolean</span></span>
+         true to show, false to hide
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "visible_pushs"></a>
+    <strong>visible_pushs (visible)</strong>
+    </dt>
+    <dd>
+    Pushes a cursor visibility onto the stack (and returns it), without writing it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">visible</span>
+            <span class="types"><span class="type">boolean</span></span>
+         true to show, false to hide
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="cursor_position"></a>cursor_position</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "cursor_get"></a>
+    <strong>cursor_get ()</strong>
+    </dt>
+    <dd>
+    Requests the current cursor position from the terminal.
+ Will read entire keyboard buffer to empty it, then request the cursor position.
+ The output buffer will be flushed.
+ In case of a keyboard error, the error will be returned here, but also by
+ <a href="../modules/terminal.html#readansi">readansi</a> on a later call, because readansi retains the proper order of keyboard
+ input, whilst this function buffers input.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">number</span></span>
+        row</li>
+        <li>
+           <span class="types"><span class="type">number</span></span>
+        column</li>
+    </ol>
+     <h3>Or</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">nil</span></span>
+
+
+</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        error message in case of a keyboard read error</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_restore"></a>
+    <strong>cursor_restore ()</strong>
+    </dt>
+    <dd>
+    Writes the ansi sequence to restore the cursor position (from the terminal storage, not stacked) to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_restores"></a>
+    <strong>cursor_restores ()</strong>
+    </dt>
+    <dd>
+    Returns the ansi sequence to restore the cursor position (from the terminal storage, not stacked).
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_save"></a>
+    <strong>cursor_save ()</strong>
+    </dt>
+    <dd>
+    Writes the ansi sequence to store the current cursor position (in terminal storage, not stacked) to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_saves"></a>
+    <strong>cursor_saves ()</strong>
+    </dt>
+    <dd>
+    Returns the ansi sequence to store to backup the current sursor position (in terminal storage, not stacked).
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_set"></a>
+    <strong>cursor_set (row, column)</strong>
+    </dt>
+    <dd>
+    Sets the cursor position and writes it to the terminal, without pushing onto the stack.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">row</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">column</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_sets"></a>
+    <strong>cursor_sets (row, column)</strong>
+    </dt>
+    <dd>
+    Creates ansi sequence to set the cursor position without writing to the terminal or pushing onto the stack.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">row</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">column</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="cursor_position_stack"></a>cursor_position_stack</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "cursor_pop"></a>
+    <strong>cursor_pop ([n=1])</strong>
+    </dt>
+    <dd>
+    Pops the last n cursor position off the stack, and writes an ansi sequence to move to the last one to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of positions to pop
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_pops"></a>
+    <strong>cursor_pops ([n=1])</strong>
+    </dt>
+    <dd>
+    Pops the last n cursor positions off the stack, and returns an ansi sequence to move to the last one without writing it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of positions to pop
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_push"></a>
+    <strong>cursor_push (row, column)</strong>
+    </dt>
+    <dd>
+    Pushes the current cursor position onto the stack, and writes an ansi sequence to move to the new position to the terminal.
+ Calls cursor.get() under the hood.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">row</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">column</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_pushs"></a>
+    <strong>cursor_pushs (row, column)</strong>
+    </dt>
+    <dd>
+    Pushes the current cursor position onto the stack, and returns an ansi sequence to move to the new position without writing it to the terminal.
+ Calls cursor.get() under the hood.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">row</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">column</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="cursor_moving"></a>cursor_moving</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "cursor_down"></a>
+    <strong>cursor_down ([n=1])</strong>
+    </dt>
+    <dd>
+    Moves the cursor down and writes it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of lines to move down
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_downs"></a>
+    <strong>cursor_downs ([n=1])</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to move the cursor down without writing it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of lines to move down
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_horizontal"></a>
+    <strong>cursor_horizontal ([n=1])</strong>
+    </dt>
+    <dd>
+    Moves the cursor horizontally and writes it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of columns to move (negative for left, positive for right)
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_horizontals"></a>
+    <strong>cursor_horizontals ([n=1])</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to move the cursor horizontally without writing it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of columns to move (negative for left, positive for right)
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_left"></a>
+    <strong>cursor_left ([n=1])</strong>
+    </dt>
+    <dd>
+    Moves the cursor left and writes it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of columns to move left
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_lefts"></a>
+    <strong>cursor_lefts ([n=1])</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to move the cursor left without writing it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of columns to move left
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_move"></a>
+    <strong>cursor_move ([rows=0[, columns=0]])</strong>
+    </dt>
+    <dd>
+    Moves the cursor horizontal and vertical and writes it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">rows</span>
+            <span class="types"><span class="type">number</span></span>
+         number of rows to move (negative for up, positive for down)
+         (<em>default</em> 0)
+        </li>
+        <li><span class="parameter">columns</span>
+            <span class="types"><span class="type">number</span></span>
+         number of columns to move (negative for left, positive for right)
+         (<em>default</em> 0)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_moves"></a>
+    <strong>cursor_moves ([rows=0[, columns=0]])</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to move the cursor horizontal and vertical without writing it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">rows</span>
+            <span class="types"><span class="type">number</span></span>
+         number of rows to move (negative for up, positive for down)
+         (<em>default</em> 0)
+        </li>
+        <li><span class="parameter">columns</span>
+            <span class="types"><span class="type">number</span></span>
+         number of columns to move (negative for left, positive for right)
+         (<em>default</em> 0)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_right"></a>
+    <strong>cursor_right ([n=1])</strong>
+    </dt>
+    <dd>
+    Moves the cursor right and writes it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of columns to move right
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_rights"></a>
+    <strong>cursor_rights ([n=1])</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to move the cursor right without writing it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of columns to move right
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_row_down"></a>
+    <strong>cursor_row_down ([rows=1])</strong>
+    </dt>
+    <dd>
+    Moves the cursor to the start of the next row and writes it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">rows</span>
+            <span class="types"><span class="type">number</span></span>
+         the number of rows to move down
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_row_downs"></a>
+    <strong>cursor_row_downs ([rows=1])</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to move the cursor to the start of the next row without writing it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">rows</span>
+            <span class="types"><span class="type">number</span></span>
+         the number of rows to move down
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_row_up"></a>
+    <strong>cursor_row_up ([rows=1])</strong>
+    </dt>
+    <dd>
+    Moves the cursor to the start of the previous row and writes it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">rows</span>
+            <span class="types"><span class="type">number</span></span>
+         the number of rows to move up
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_row_ups"></a>
+    <strong>cursor_row_ups ([rows=1])</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to move the cursor to the start of the previous row without writing it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">rows</span>
+            <span class="types"><span class="type">number</span></span>
+         the number of rows to move up
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_tocolumn"></a>
+    <strong>cursor_tocolumn (column)</strong>
+    </dt>
+    <dd>
+    Moves the cursor to a column on the current row and writes it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">column</span>
+            <span class="types"><span class="type">number</span></span>
+         the column to move to
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_tocolumns"></a>
+    <strong>cursor_tocolumns (column)</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to move the cursor to a column on the current row without writing it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">column</span>
+            <span class="types"><span class="type">number</span></span>
+         the column to move to
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_torow"></a>
+    <strong>cursor_torow (row)</strong>
+    </dt>
+    <dd>
+    Moves the cursor to a row on the current column and writes it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">row</span>
+            <span class="types"><span class="type">number</span></span>
+         the row to move to
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_torows"></a>
+    <strong>cursor_torows (row)</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to move the cursor to a row on the current column without writing it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">row</span>
+            <span class="types"><span class="type">number</span></span>
+         the row to move to
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_up"></a>
+    <strong>cursor_up ([n=1])</strong>
+    </dt>
+    <dd>
+    Moves the cursor up and writes it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of lines to move up
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_ups"></a>
+    <strong>cursor_ups ([n=1])</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to move the cursor up without writing it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of lines to move up
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_vertical"></a>
+    <strong>cursor_vertical ([n=1])</strong>
+    </dt>
+    <dd>
+    Moves the cursor vertically and writes it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of lines to move (negative for up, positive for down)
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor_verticals"></a>
+    <strong>cursor_verticals ([n=1])</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to move the cursor vertically without writing it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of lines to move (negative for up, positive for down)
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="clearing"></a>clearing</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "clear"></a>
+    <strong>clear ()</strong>
+    </dt>
+    <dd>
+    Clears the screen and writes it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "clear_bottom"></a>
+    <strong>clear_bottom ()</strong>
+    </dt>
+    <dd>
+    Clears the screen from the cursor position to the right and bottom and writes it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "clear_bottoms"></a>
+    <strong>clear_bottoms ()</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to clear the screen from the cursor position to the right and bottom without writing it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "clear_box"></a>
+    <strong>clear_box (height, width)</strong>
+    </dt>
+    <dd>
+    Clears a box from the cursor position (top-left) and writes it to the terminal.
+ Cursor will return to the original position.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">height</span>
+            <span class="types"><span class="type">number</span></span>
+         the height of the box in rows
+        </li>
+        <li><span class="parameter">width</span>
+            <span class="types"><span class="type">number</span></span>
+         the width of the box in columns
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "clear_boxs"></a>
+    <strong>clear_boxs (height, width)</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to clear a box from the cursor position (top-left) without writing it to the terminal.
+ Cursor will return to the original position.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">height</span>
+            <span class="types"><span class="type">number</span></span>
+         the height of the box in rows
+        </li>
+        <li><span class="parameter">width</span>
+            <span class="types"><span class="type">number</span></span>
+         the width of the box in columns
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "clear_end"></a>
+    <strong>clear_end ()</strong>
+    </dt>
+    <dd>
+    Clears the line from the cursor position to the right and writes it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "clear_ends"></a>
+    <strong>clear_ends ()</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to clear the line from the cursor position to the right without writing it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "clear_line"></a>
+    <strong>clear_line ()</strong>
+    </dt>
+    <dd>
+    Clears the line and writes it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "clear_lines"></a>
+    <strong>clear_lines ()</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to clear the line without writing it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "clear_start"></a>
+    <strong>clear_start ()</strong>
+    </dt>
+    <dd>
+    Clears the line from the cursor position to the left and writes it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "clear_starts"></a>
+    <strong>clear_starts ()</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to clear the line from the cursor position to the left without writing it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "clear_top"></a>
+    <strong>clear_top ()</strong>
+    </dt>
+    <dd>
+    Clears the screen from the cursor position to the left and top and writes it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "clear_tops"></a>
+    <strong>clear_tops ()</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to clear the screen from the cursor position to the left and top without writing it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "clears"></a>
+    <strong>clears ()</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to clear the screen without writing it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="scrolling"></a>scrolling</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "scroll_"></a>
+    <strong>scroll_ ([n=0])</strong>
+    </dt>
+    <dd>
+    Scrolls the screen vertically and writes it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of lines to scroll (negative for up, positive for down)
+         (<em>default</em> 0)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "scroll_down"></a>
+    <strong>scroll_down ([n=1])</strong>
+    </dt>
+    <dd>
+    Scrolls the screen down and writes it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of lines to scroll down
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "scroll_downs"></a>
+    <strong>scroll_downs ([n=1])</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to scroll the screen down without writing it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of lines to scroll down
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "scroll_region"></a>
+    <strong>scroll_region (top, bottom)</strong>
+    </dt>
+    <dd>
+    Sets the scroll region and writes it to the terminal.
+ If no arguments are given, it resets the scroll region to the whole screen.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">top</span>
+            <span class="types"><span class="type">number</span></span>
+         top row of the scroll region
+        </li>
+        <li><span class="parameter">bottom</span>
+            <span class="types"><span class="type">number</span></span>
+         bottom row of the scroll region
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "scroll_regions"></a>
+    <strong>scroll_regions (top, bottom)</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to set the scroll region without writing it to the terminal.
+ If no arguments are given, it resets the scroll region to the whole screen.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">top</span>
+            <span class="types"><span class="type">number</span></span>
+         top row of the scroll region
+        </li>
+        <li><span class="parameter">bottom</span>
+            <span class="types"><span class="type">number</span></span>
+         bottom row of the scroll region
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "scroll_s"></a>
+    <strong>scroll_s ([n=0])</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to scroll the screen vertically without writing it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of lines to scroll (negative for up, positive for down)
+         (<em>default</em> 0)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "scroll_up"></a>
+    <strong>scroll_up ([n=1])</strong>
+    </dt>
+    <dd>
+    Scrolls the screen up and writes it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of lines to scroll up
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "scroll_ups"></a>
+    <strong>scroll_ups ([n=1])</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to scroll the screen up without writing it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of lines to scroll up
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="scrolling_region"></a>scrolling_region</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "scroll_apply"></a>
+    <strong>scroll_apply ()</strong>
+    </dt>
+    <dd>
+    Applies the scroll region at the top of the stack, and writes it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "scroll_applys"></a>
+    <strong>scroll_applys ()</strong>
+    </dt>
+    <dd>
+    Applies the scroll region at the top of the stack (returns it, does not write it to the terminal).
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "scroll_pop"></a>
+    <strong>scroll_pop ([n=1])</strong>
+    </dt>
+    <dd>
+    Pops <code>n</code> scroll region(s) off the stack, and writes the last to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of scroll regions to pop
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "scroll_pops"></a>
+    <strong>scroll_pops ([n=1])</strong>
+    </dt>
+    <dd>
+    Pops <code>n</code> scroll region(s) off the stack (and returns the last), without writing it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of scroll regions to pop
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "scroll_push"></a>
+    <strong>scroll_push (top, bottom)</strong>
+    </dt>
+    <dd>
+    Pushes a new scroll region onto the stack, and writes it to the terminal.
+ If no arguments are given, it resets the scroll region to the whole screen.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">top</span>
+            <span class="types"><span class="type">number</span></span>
+         top row of the scroll region
+        </li>
+        <li><span class="parameter">bottom</span>
+            <span class="types"><span class="type">number</span></span>
+         bottom row of the scroll region
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "scroll_pushs"></a>
+    <strong>scroll_pushs (top, bottom)</strong>
+    </dt>
+    <dd>
+    Pushes a new scroll region onto the stack (and returns it), without writing it to the terminal.
+ If no arguments are given, it resets the scroll region to the whole screen.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">top</span>
+            <span class="types"><span class="type">number</span></span>
+         top row of the scroll region
+        </li>
+        <li><span class="parameter">bottom</span>
+            <span class="types"><span class="type">number</span></span>
+         bottom row of the scroll region
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="textcolor"></a>textcolor</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "blink_off"></a>
+    <strong>blink_off ()</strong>
+    </dt>
+    <dd>
+    Unsets the blink attribute and writes it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "blink_offs"></a>
+    <strong>blink_offs ()</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to unset the blink attribute without writing it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "blink_on"></a>
+    <strong>blink_on ()</strong>
+    </dt>
+    <dd>
+    Sets the blink attribute and writes it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "blink_ons"></a>
+    <strong>blink_ons ()</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to set the blink attribute without writing it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "brightness"></a>
+    <strong>brightness (brightness)</strong>
+    </dt>
+    <dd>
+    Sets the brightness and writes it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">brightness</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a> or <span class="type">integer</span></span>
+         the brightness to set
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "brightnesss"></a>
+    <strong>brightnesss (brightness)</strong>
+    </dt>
+    <dd>
+
+<p>Creates an ansi sequence to set the brightness without writing it to the terminal.
+ <a href="../modules/terminal.html#brightness">brightness</a> can be one of the following:</p>
+
+<ul>
+    <li><code>0</code>, <code>&quot;off&quot;</code>, or <code>&quot;invisble&quot;</code> for invisible</li>
+    <li><code>1</code>, <code>&quot;low&quot;</code>, or <code>&quot;dim&quot;</code> for dim</li>
+    <li><code>2</code>, <code>&quot;normal&quot;</code> for normal</li>
+    <li><code>3</code>, <code>&quot;high&quot;</code>, <code>&quot;bright&quot;</code>, or <code>&quot;bold&quot;</code> for bright</li>
+</ul>
+
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">brightness</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a> or <span class="type">integer</span></span>
+         the brightness to set
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "color_bg"></a>
+    <strong>color_bg (r[, g[, b]])</strong>
+    </dt>
+    <dd>
+    Sets the background color and writes it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">r</span>
+            <span class="types"><span class="type">integer</span></span>
+         in case of RGB, the red value, a number for extended colors, a string color for base-colors
+        </li>
+        <li><span class="parameter">g</span>
+            <span class="types"><span class="type">number</span></span>
+         in case of RGB, the green value
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">b</span>
+            <span class="types"><span class="type">number</span></span>
+         in case of RGB, the blue value
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "color_bgs"></a>
+    <strong>color_bgs (r[, g[, b]])</strong>
+    </dt>
+    <dd>
+
+<p>Creates an ansi sequence to set the background color without writing it to the terminal.
+ This function takes three color types:</p>
+
+<ol>
+    <li>base colors: black, red, green, yellow, blue, magenta, cyan, white. Use as <code>color_bgs(&quot;red&quot;)</code>.</li>
+    <li>extended colors: a number between 0 and 255. Use as <code>color_bgs(123)</code>.</li>
+    <li>RGB colors: three numbers between 0 and 255. Use as <code>color_bgs(123, 123, 123)</code>.</li>
+</ol>
+
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">r</span>
+            <span class="types"><span class="type">integer</span></span>
+         in case of RGB, the red value, a number for extended colors, a string color for base-colors
+        </li>
+        <li><span class="parameter">g</span>
+            <span class="types"><span class="type">number</span></span>
+         in case of RGB, the green value
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">b</span>
+            <span class="types"><span class="type">number</span></span>
+         in case of RGB, the blue value
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "color_fg"></a>
+    <strong>color_fg (r[, g[, b]])</strong>
+    </dt>
+    <dd>
+    Sets the foreground color and writes it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">r</span>
+            <span class="types"><span class="type">integer</span></span>
+         in case of RGB, the red value, a number for extended colors, a string color for base-colors
+        </li>
+        <li><span class="parameter">g</span>
+            <span class="types"><span class="type">number</span></span>
+         in case of RGB, the green value
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">b</span>
+            <span class="types"><span class="type">number</span></span>
+         in case of RGB, the blue value
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "color_fgs"></a>
+    <strong>color_fgs (r[, g[, b]])</strong>
+    </dt>
+    <dd>
+
+<p>Creates an ansi sequence to set the foreground color without writing it to the terminal.
+ This function takes three color types:</p>
+
+<ol>
+    <li>base colors: black, red, green, yellow, blue, magenta, cyan, white. Use as <code>color_fgs(&quot;red&quot;)</code>.</li>
+    <li>extended colors: a number between 0 and 255. Use as <code>color_fgs(123)</code>.</li>
+    <li>RGB colors: three numbers between 0 and 255. Use as <code>color_fgs(123, 123, 123)</code>.</li>
+</ol>
+
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">r</span>
+            <span class="types"><span class="type">integer</span></span>
+         in case of RGB, the red value, a number for extended colors, a string color for base-colors
+        </li>
+        <li><span class="parameter">g</span>
+            <span class="types"><span class="type">number</span></span>
+         in case of RGB, the green value
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">b</span>
+            <span class="types"><span class="type">number</span></span>
+         in case of RGB, the blue value
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "reverse_off"></a>
+    <strong>reverse_off ()</strong>
+    </dt>
+    <dd>
+    Unsets the reverse attribute and writes it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "reverse_offs"></a>
+    <strong>reverse_offs ()</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to unset the reverse attribute without writing it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "reverse_on"></a>
+    <strong>reverse_on ()</strong>
+    </dt>
+    <dd>
+    Sets the reverse attribute and writes it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "reverse_ons"></a>
+    <strong>reverse_ons ()</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to set the reverse attribute without writing it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "underline_off"></a>
+    <strong>underline_off ()</strong>
+    </dt>
+    <dd>
+    Unsets the underline attribute and writes it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "underline_offs"></a>
+    <strong>underline_offs ()</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to unset the underline attribute without writing it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "underline_on"></a>
+    <strong>underline_on ()</strong>
+    </dt>
+    <dd>
+    Sets the underline attribute and writes it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "underline_ons"></a>
+    <strong>underline_ons ()</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to set the underline attribute without writing it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="textcolor_stack"></a>textcolor_stack</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "textapply"></a>
+    <strong>textapply ()</strong>
+    </dt>
+    <dd>
+    Re-applies the current attributes, and writes it to the terminal.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "textapplys"></a>
+    <strong>textapplys ()</strong>
+    </dt>
+    <dd>
+    Re-applies the current attributes (returns it, does not write it to the terminal).
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "textpop"></a>
+    <strong>textpop ([n=1])</strong>
+    </dt>
+    <dd>
+    Pops n attributes off the stack, and writes the last one to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of attributes to pop
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "textpops"></a>
+    <strong>textpops ([n=1])</strong>
+    </dt>
+    <dd>
+    Pops n attributes off the stack (and returns the last one), without writing it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of attributes to pop
+         (<em>default</em> 1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "textpush"></a>
+    <strong>textpush (attr)</strong>
+    </dt>
+    <dd>
+    Pushes the current attributes onto the stack, and writes an ansi sequence to set the new attributes to the terminal.
+ Every element omitted in the <code>attr</code> table will be taken from the current top of the stack.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">attr</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+         the attributes to set, see <a href="../modules/terminal.html#textsets">textsets</a> for details.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "textpushs"></a>
+    <strong>textpushs (attr)</strong>
+    </dt>
+    <dd>
+    Pushes the current attributes onto the stack, and returns an ansi sequence to set the new attributes without writing it to the terminal.
+ Every element omitted in the <code>attr</code> table will be taken from the current top of the stack.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">attr</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+         the attributes to set, see <a href="../modules/terminal.html#textsets">textsets</a> for details.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "textset"></a>
+    <strong>textset (attr)</strong>
+    </dt>
+    <dd>
+    Sets the text attributes and writes it to the terminal.
+ Every element omitted in the <code>attr</code> table will be taken from the current top of the stack.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">attr</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+         the attributes to set, see <a href="../modules/terminal.html#textsets">textsets</a> for details.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "textsets"></a>
+    <strong>textsets (attr)</strong>
+    </dt>
+    <dd>
+    Creates an ansi sequence to set the text attributes without writing it to the terminal.
+ Only set what you change. Every element omitted in the <code>attr</code> table will be taken from the current top of the stack.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">attr</span> the attributes to set, with keys:
+        <ul>
+        <li><span class="parameter">fg</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a> or <span class="type">integer</span></span>
+         the foreground color to set. Base color (string), or extended color (number). Takes precedence of <code>fg_r</code>, <code>fg_g</code>, <code>fg_b</code>.
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">fg_r</span>
+            <span class="types"><span class="type">integer</span></span>
+         the red value of the foreground color to set.
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">fg_g</span>
+            <span class="types"><span class="type">integer</span></span>
+         the green value of the foreground color to set.
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">fg_b</span>
+            <span class="types"><span class="type">integer</span></span>
+         the blue value of the foreground color to set.
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">bg</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a> or <span class="type">integer</span></span>
+         the background color to set. Base color (string), or extended color (number). Takes precedence of <code>bg_r</code>, <code>bg_g</code>, <code>bg_b</code>.
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">bg_r</span>
+            <span class="types"><span class="type">integer</span></span>
+         the red value of the background color to set.
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">bg_g</span>
+            <span class="types"><span class="type">integer</span></span>
+         the green value of the background color to set.
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">bg_b</span>
+            <span class="types"><span class="type">integer</span></span>
+         the blue value of the background color to set.
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">brightness</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a> or <span class="type">number</span></span>
+         the brightness level to set
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">underline</span>
+            <span class="types"><span class="type">boolean</span></span>
+         whether to set underline
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">blink</span>
+            <span class="types"><span class="type">boolean</span></span>
+         whether to set blink
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">reverse</span>
+            <span class="types"><span class="type">boolean</span></span>
+         whether to set reverse
+         (<em>optional</em>)
+        </li>
+        </li></ul>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="lines"></a>lines</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "box"></a>
+    <strong>box (height, width, format, clear[, title=""[, lastcolumn]])</strong>
+    </dt>
+    <dd>
+    Draws a box and writes it to the terminal.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">height</span>
+            <span class="types"><span class="type">number</span></span>
+         the height of the box in rows
+        </li>
+        <li><span class="parameter">width</span>
+            <span class="types"><span class="type">number</span></span>
+         the width of the box in columns
+        </li>
+        <li><span class="parameter">format</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+         the format for the box, see <a href="../modules/terminal.html#boxs">boxs</a> for details.
+        </li>
+        <li><span class="parameter">clear</span>
+            <span class="types"><span class="type">bool</span></span>
+         whether to clear the box contents
+        </li>
+        <li><span class="parameter">title</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the title to draw
+         (<em>default</em> "")
+        </li>
+        <li><span class="parameter">lastcolumn</span>
+            <span class="types"><span class="type">boolean</span></span>
+         whether to draw the last column of the terminal
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "box_fmt"></a>
+    <strong>box_fmt</strong>
+    </dt>
+    <dd>
+    Table with pre-defined box formats.
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">single</span>
+         Single line box format
+        </li>
+        <li><span class="parameter">double</span>
+         Double line box format
+        </li>
+        <li><span class="parameter">copy</span>
+         Function to copy a box format, see <a href="../modules/terminal.html#box_fmt.copy">box_fmt.copy</a> for details
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "box_fmt.copy"></a>
+    <strong>box_fmt.copy (default)</strong>
+    </dt>
+    <dd>
+    Copy a box format.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">default</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+         the default format to copy
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+        a copy of the default format provided
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="comment">-- create new format with spaces around the title
+</span><span class="keyword">local</span> fmt = t.box_fmt.<span class="function-name">copy</span>(t.box_fmt.single)
+fmt.pre = fmt.pre .. <span class="string">" "</span>
+fmt.post = <span class="string">" "</span> .. fmt.post</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "boxs"></a>
+    <strong>boxs (height, width[, format[, clear=" "[, title=""[, lastcolumn=""]]]])</strong>
+    </dt>
+    <dd>
+    Creates a sequence to draw a box, without writing it to the terminal.
+ The box is drawn starting from the top-left corner at the current cursor position,
+ after drawing the cursor will be in the same position.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">height</span>
+            <span class="types"><span class="type">number</span></span>
+         the height of the box in rows
+        </li>
+        <li><span class="parameter">width</span>
+            <span class="types"><span class="type">number</span></span>
+         the width of the box in columns
+        </li>
+        <li><span class="parameter">format</span> the format for the box (default is single line), with keys:
+        <ul>
+        <li><span class="parameter">h</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the horizontal line character
+         (<em>default</em> " ")
+        </li>
+        <li><span class="parameter">v</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the vertical line character
+         (<em>default</em> "")
+        </li>
+        <li><span class="parameter">tl</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the top left corner character
+         (<em>default</em> "")
+        </li>
+        <li><span class="parameter">tr</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the top right corner character
+         (<em>default</em> "")
+        </li>
+        <li><span class="parameter">bl</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the bottom left corner character
+         (<em>default</em> "")
+        </li>
+        <li><span class="parameter">br</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the bottom right corner character
+         (<em>default</em> "")
+        </li>
+        <li><span class="parameter">pre</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the title-prefix character(s)
+         (<em>default</em> "")
+        </li>
+        <li><span class="parameter">post</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the left-postfix character(s)
+         (<em>default</em> "")
+        </li>
+        </li></ul>
+        <li><span class="parameter">clear</span>
+            <span class="types"><span class="type">bool</span></span>
+         whether to clear the box contents
+         (<em>default</em> false)
+        </li>
+        <li><span class="parameter">title</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the title to draw
+         (<em>default</em> "")
+        </li>
+        <li><span class="parameter">lastcolumn</span>
+            <span class="types"><span class="type">boolean</span></span>
+         whether to draw the last column of the terminal
+         (<em>default</em> false)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "line_horizontal"></a>
+    <strong>line_horizontal (n[, char="─"])</strong>
+    </dt>
+    <dd>
+    Draws a horizontal line and writes it to the terminal.
+ Line is drawn left to right.
+ Returned sequence might be shorter than requested if the character is a multi-byte character
+ and the number of columns is not a multiple of the character width.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of columns to draw
+        </li>
+        <li><span class="parameter">char</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the character to draw
+         (<em>default</em> "─")
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "line_horizontals"></a>
+    <strong>line_horizontals (n[, char="─"])</strong>
+    </dt>
+    <dd>
+    Creates a sequence to draw a horizontal line without writing it to the terminal.
+ Line is drawn left to right.
+ Returned sequence might be shorter than requested if the character is a multi-byte character
+ and the number of columns is not a multiple of the character width.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of columns to draw
+        </li>
+        <li><span class="parameter">char</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the character to draw
+         (<em>default</em> "─")
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "line_title"></a>
+    <strong>line_title (title, width[, char="─"[, pre=""[, post=""]]])</strong>
+    </dt>
+    <dd>
+    Draws a horizontal line with a title centered in it and writes it to the terminal.
+ Line is drawn left to right. If the width is too small for the title, the title is truncated with "trailing <code>&quot;...&quot;</code>.
+ If less than 4 characters are available for the title, the title is omitted alltogether.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">title</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the title to draw
+        </li>
+        <li><span class="parameter">width</span>
+            <span class="types"><span class="type">number</span></span>
+         the total width of the line in columns
+        </li>
+        <li><span class="parameter">char</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the line-character to use
+         (<em>default</em> "─")
+        </li>
+        <li><span class="parameter">pre</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the prefix for the title, eg. "┤ "
+         (<em>default</em> "")
+        </li>
+        <li><span class="parameter">post</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the postfix for the title, eg. " ├"
+         (<em>default</em> "")
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "line_titles"></a>
+    <strong>line_titles (width[, title=""[, char="─"[, pre=""[, post=""]]]])</strong>
+    </dt>
+    <dd>
+    Creates a sequence to draw a horizontal line with a title centered in it without writing it to the terminal.
+ Line is drawn left to right. If the width is too small for the title, the title is truncated with "trailing <code>&quot;...&quot;</code>.
+ If less than 4 characters are available for the title, the title is omitted alltogether.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">width</span>
+            <span class="types"><span class="type">number</span></span>
+         the total width of the line in columns
+        </li>
+        <li><span class="parameter">title</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the title to draw (if empty or nil, only the line is drawn)
+         (<em>default</em> "")
+        </li>
+        <li><span class="parameter">char</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the line-character to use
+         (<em>default</em> "─")
+        </li>
+        <li><span class="parameter">pre</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the prefix for the title, eg. "┤ "
+         (<em>default</em> "")
+        </li>
+        <li><span class="parameter">post</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the postfix for the title, eg. " ├"
+         (<em>default</em> "")
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "line_vertical"></a>
+    <strong>line_vertical (n[, char="│"])</strong>
+    </dt>
+    <dd>
+    Draws a vertical line and writes it to the terminal.
+ Line is drawn top to bottom. Cursor is left to the right of the last character (so not below it).
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of rows/lines to draw
+        </li>
+        <li><span class="parameter">char</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the character to draw
+         (<em>default</em> "│")
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "line_verticals"></a>
+    <strong>line_verticals (n[, char="│"[, lastcolumn]])</strong>
+    </dt>
+    <dd>
+    Creates a sequence to draw a vertical line without writing it to the terminal.
+ Line is drawn top to bottom. Cursor is left to the right of the last character (so not below it).
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         number of rows/lines to draw
+        </li>
+        <li><span class="parameter">char</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the character to draw
+         (<em>default</em> "│")
+        </li>
+        <li><span class="parameter">lastcolumn</span>
+            <span class="types"><span class="type">boolean</span></span>
+         whether to draw the last column of the terminal
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        ansi sequence to write to the terminal
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="initialization"></a>initialization</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "initialize"></a>
+    <strong>initialize ([opts])</strong>
+    </dt>
+    <dd>
+    Initializes the terminal for use.
+ Makes a backup of the current terminal settings.
+ Sets input to non-blocking, disables canonical mode and echo, and enables ANSI processing.
+ The preferred way to initialize the terminal is through <a href="../modules/terminal.html#initwrap">initwrap</a>, since that ensures settings
+ are properly restored in case of an error, and don't leave the terminal in an inconsistent state
+ for the user after exit.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">opts</span> options table, with keys:
+        <ul>
+        <li><span class="parameter">displaybackup</span>
+            <span class="types"><span class="type">boolean</span></span>
+         if true, the current terminal display is also
+ backed up (by switching to the alternate screen buffer).
+         (<em>default</em> false)
+        </li>
+        <li><span class="parameter">filehandle</span>
+            <span class="types"><span class="type">filehandle</span></span>
+         the stream to use for output
+         (<em>default</em> io.stderr)
+        </li>
+        <li><span class="parameter">bsleep</span>
+            <span class="types"><span class="type">function</span></span>
+         the blocking sleep function to use.
+ This should never be set to a yielding sleep function! This function
+ will be used by the <a href="../modules/terminal.html#write">terminal.write</a> and <a href="../modules/terminal.html#print">terminal.print</a> to prevent buffer-overflows and
+ truncation when writing to the terminal. And by <a href="../modules/terminal.html#cursor_get">cursor_get</a> when reading the cursor position.
+         (<em>default</em> sys.sleep)
+        </li>
+        <li><span class="parameter">sleep</span>
+            <span class="types"><span class="type">function</span></span>
+         the default sleep function to use for <a href="../modules/terminal.html#readansi">readansi</a>.
+ In an async application (coroutines), this should be a yielding sleep function, eg. <code>copas.pause</code>.
+         (<em>default</em> sys.sleep)
+        </li>
+        </li></ul>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "initwrap"></a>
+    <strong>initwrap ([opts], main, ...)</strong>
+    </dt>
+    <dd>
+    Wrap a function in <a href="../modules/terminal.html#initialize">initialize</a> and <a href="../modules/terminal.html#shutdown">shutdown</a> calls.
+ When an error occurs, and the application exits, the terminal might not be properly shut down.
+ This function wraps a function in calls to <a href="../modules/terminal.html#initialize">initialize</a> and <a href="../modules/terminal.html#shutdown">shutdown</a>, ensuring the terminal is properly shut down.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">opts</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+         options table, to pass to <a href="../modules/terminal.html#initialize">initialize</a>.
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">main</span>
+            <span class="types"><span class="type">function</span></span>
+         the function to wrap
+        </li>
+        <li><span class="parameter">...</span>
+         any parameters to pass to the main function
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">any</span></span>
+        the return values of the wrapped function, or nil+err in case of an error
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> <span class="keyword">function</span> <span class="function-name">main</span>(param1, param2)
+  <span class="comment">-- your main app functionality here
+</span>
+  <span class="keyword">return</span> <span class="keyword">true</span> <span class="comment">-- return truthy to pass assertion below
+</span><span class="keyword">end</span>
+
+<span class="keyword">local</span> opts = {
+  filehandle = <span class="global">io</span>.stderr,
+  displaybackup = <span class="keyword">true</span>,
+}
+<span class="global">assert</span>(t.<span class="function-name">initwrap</span>(opts, main, <span class="string">"one"</span>, <span class="string">"two"</span>)) <span class="comment">-- assert to rethrow any error after termimal restore</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "shutdown"></a>
+    <strong>shutdown ()</strong>
+    </dt>
+    <dd>
+    Shuts down the terminal, restoring the terminal settings.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2025-03-03 09:04:53 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
