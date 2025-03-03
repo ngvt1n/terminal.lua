@@ -1,7 +1,6 @@
 -- This example demonstrates the use of the text-attribute stack, and how to
 -- use it to manage text attributes in a more structured way.
 
-local sys = require("system")
 local t = require("terminal")
 local p = require("terminal.progress")
 
@@ -57,7 +56,7 @@ local function main()
       s()
     end
     t.flush()
-    if sys.readansi(0.02) then
+    if t.readansi(0.02) then
       break -- a key was pressed
     end
   end

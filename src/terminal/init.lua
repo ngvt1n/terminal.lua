@@ -28,7 +28,9 @@ end
 
 
 local sys = require "system"
-local t -- the terminal/stream to operate on, default io.stdout
+local t -- the terminal/stream to operate on, default io.stderr
+local bsleep  -- a blocking sleep function
+local asleep   -- a (optionally) non-blocking sleep function
 
 --=============================================================================
 -- Sequence object
@@ -135,7 +137,7 @@ do
       if bytecount_left <= 0 then
         bytecount_left = chunksize
         t:flush()
-        sys.sleep(delay) -- sleep a bit to allow the terminal to process the data
+        bsleep(delay) -- (blocking) sleep a bit to allow the terminal to process the data
       end
     end
 
@@ -377,14 +379,22 @@ end
 local _positionstack = {}
 
 
-local new_readansi, old_readansi do
+do
   local kbbuffer = {}
   local kbstart = 0
   local kbend = 0
+  local sys_readansi = sys.readansi
 
-  old_readansi = sys.readansi
-
-  function new_readansi(timeout)
+  --- Same as `sys.readansi`, but works with the buffer required by `terminal.lua`.
+  -- This function will read from the buffer first, before calling `sys.readansi`. This is
+  -- required because querying the terminal (e.g. getting cursor position) might read data
+  -- from the keyboard buffer, which would be lost if not buffered. Hence this function
+  -- must be used instead of `sys.readansi`, to ensure the previously read buffer is
+  -- consumed first.
+  -- @tparam number timeout the timeout in seconds
+  -- @tparam[opt] function fsleep the sleep function to use (default: the sleep function
+  -- set by `initialize`)
+  function M.readansi(timeout, fsleep)
     if kbend ~= 0 then
       -- we have buffered input
       kbstart = kbstart + 1
@@ -396,14 +406,14 @@ local new_readansi, old_readansi do
       end
       return unpack(res)
     end
-    return old_readansi(timeout)
+    return sys_readansi(timeout, fsleep or asleep)
   end
 
 
   -- prereads all of the keyboard buffer into the cache
   function M._cursor_get_prep()
     while true do
-      local seq, typ, part = old_readansi(0)
+      local seq, typ, part = sys_readansi(0, bsleep)
       if seq == nil and typ == "timeout" then
         return true
       end
@@ -434,7 +444,7 @@ local new_readansi, old_readansi do
     -- read responses
     local result = {}
     while true do
-      local seq, typ, part = old_readansi(0.5) -- 500ms timeout, max time for terminal to respond
+      local seq, typ, part = sys_readansi(0.5, bsleep) -- 500ms timeout, max time for terminal to respond
       if seq == nil and typ == "timeout" then
         error("no response from terminal, this is unexpected")
       end
@@ -1809,12 +1819,17 @@ do
   -- @tparam[opt=io.stderr] filehandle filehandle the stream to use for output
   -- @return true
   -- @within initialization
-  function M.initialize(displaybackup, filehandle)
+  function M.initialize(displaybackup, filehandle, fbsleep, fasleep)
     assert(not M.ready(), "terminal already initialized")
 
     filehandle = filehandle or io.stderr
     assert(io.type(filehandle) == 'file', "invalid file handle")
     t = filehandle
+
+    bsleep = fbsleep or sys.sleep
+    assert(type(bsleep) == "function", "invalid bsleep function, expected a function, got " .. type(bsleep))
+    asleep = fasleep or sys.sleep
+    assert(type(asleep) == "function", "invalid sleep function, expected a function, got " .. type(asleep))
 
     termbackup = sys.termbackup()
     if displaybackup then
@@ -1835,9 +1850,6 @@ do
     })
     -- setup stdin to non-blocking mode
     sys.setnonblock(io.stdin, true)
-
-    -- set up keyboard buffering for cursor pos reading
-    sys.readansi = new_readansi
 
     return true
   end
@@ -1869,8 +1881,9 @@ do
     sys.termrestore(termbackup)
 
     t = nil
+    asleep = nil
+    bsleep = nil
     termbackup = nil
-    sys.readansi = old_readansi
 
     return true
   end

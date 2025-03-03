@@ -1,7 +1,6 @@
 -- This example demonstrates the use of the text-attribute stack, and how to
 -- use it to manage text attributes in a more structured way.
 
-local sys = require("system")
 local t = require("terminal")
 
 
@@ -45,7 +44,7 @@ t.print("Hello dim white World! (again)")
 t.textpop()
 t.write("Press any key, or wait 5 seconds...")
 t.flush()
-sys.readansi(5)
+t.readansi(5)
 
 -- restore all settings (reverts to original screen buffer)
 t.shutdown()
