@@ -5,7 +5,10 @@ local t = require("terminal")
 
 
 -- initialize terminal; backup (switch to alternate buffer) and set output to stdout
-t.initialize(true, io.stdout)
+t.initialize{
+  displaybackup = true,
+  filehandle = io.stdout,
+}
 
 -- clear the screen, and move cursor to top-left
 t.clear()

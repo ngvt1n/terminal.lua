@@ -1814,25 +1814,35 @@ do
   -- The preferred way to initialize the terminal is through `initwrap`, since that ensures settings
   -- are properly restored in case of an error, and don't leave the terminal in an inconsistent state
   -- for the user after exit.
-  -- @tparam[opt=false] boolean displaybackup if true, the current terminal display is also
+  -- @tparam[opt] table opts options table, with keys:
+  -- @tparam[opt=false] boolean opts.displaybackup if true, the current terminal display is also
   -- backed up (by switching to the alternate screen buffer).
-  -- @tparam[opt=io.stderr] filehandle filehandle the stream to use for output
+  -- @tparam[opt=io.stderr] filehandle opts.filehandle the stream to use for output
+  -- @tparam[opt=sys.sleep] function opts.bsleep the blocking sleep function to use.
+  -- This should never be set to a yielding sleep function! This function
+  -- will be used by the `terminal.write` and `terminal.print` to prevent buffer-overflows and
+  -- truncation when writing to the terminal. And by `cursor_get` when reading the cursor position.
+  -- @tparam[opt=sys.sleep] function opts.sleep the default sleep function to use for `readansi`.
+  -- In an async application (coroutines), this should be a yielding sleep function, eg. `copas.pause`.
   -- @return true
   -- @within initialization
-  function M.initialize(displaybackup, filehandle, fbsleep, fasleep)
+  function M.initialize(opts)
     assert(not M.ready(), "terminal already initialized")
 
-    filehandle = filehandle or io.stderr
-    assert(io.type(filehandle) == 'file', "invalid file handle")
+    opts = opts or {}
+    assert(type(opts) == "table", "expected opts to be a table, got " .. type(opts))
+
+    local filehandle = opts.filehandle or io.stderr
+    assert(io.type(filehandle) == 'file', "invalid opts.filehandle")
     t = filehandle
 
-    bsleep = fbsleep or sys.sleep
-    assert(type(bsleep) == "function", "invalid bsleep function, expected a function, got " .. type(bsleep))
-    asleep = fasleep or sys.sleep
-    assert(type(asleep) == "function", "invalid sleep function, expected a function, got " .. type(asleep))
+    bsleep = opts.bsleep or sys.sleep
+    assert(type(bsleep) == "function", "invalid opts.bsleep function, expected a function, got " .. type(opts.bsleep))
+    asleep = opts.sleep or sys.sleep
+    assert(type(asleep) == "function", "invalid opts.sleep function, expected a function, got " .. type(opts.sleep))
 
     termbackup = sys.termbackup()
-    if displaybackup then
+    if opts.displaybackup then
       M.write(savescreen)
       termbackup.displaybackup = true
     end

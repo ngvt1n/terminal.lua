@@ -30,7 +30,10 @@ end
 
 
 -- initialize terminal; backup (switch to alternate buffer) and set output to stdout
-t.initialize(true, io.stdout)
+t.initialize{
+  displaybackup = true,
+  filehandle = io.stdout,
+}
 
 -- clear the screen, and draw the test screen
 t.clear()
