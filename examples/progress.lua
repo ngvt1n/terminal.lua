@@ -46,7 +46,7 @@ local function main()
   }
 
 
-  t.write("Press any key to stop the spinners...")
+  t.output.write("Press any key to stop the spinners...")
   t.visible(false)
 
 
@@ -55,7 +55,7 @@ local function main()
     for _, s in ipairs(spinners) do
       s()
     end
-    t.flush()
+    t.output.flush()
     if t.input.readansi(0.02) then
       break -- a key was pressed
     end
@@ -66,7 +66,7 @@ local function main()
     s(true)
   end
   t.visible(true)
-  t.print() -- move to new line (we're still on the 'press any key' line)
+  t.output.print() -- move to new line (we're still on the 'press any key' line)
 
   return true
 end

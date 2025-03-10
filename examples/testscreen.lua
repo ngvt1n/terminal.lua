@@ -19,7 +19,7 @@ local function testscreen()
   -- print all rows to fill the screen
   for i = 1, r do
     t.cursor_set(i, 1)
-    t.write(row)
+    t.output.write(row)
   end
 
   -- pop the color previously set, restoring the previous setting
@@ -54,8 +54,8 @@ t.textset{
   bg = "blue",
   brightness = 3,
 }
-t.write("Hello World! press any key, or wait 5 seconds...")
-t.flush()
+t.output.write("Hello World! press any key, or wait 5 seconds...")
+t.output.flush()
 t.input.readansi(5)
 
 -- restore all settings (reverts to original screen buffer)

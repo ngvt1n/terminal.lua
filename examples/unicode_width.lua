@@ -17,10 +17,10 @@ local function test()
   for n = 0, #pr do
     local sprite = pr[n]
     local c = w.write_swidth(sprite)
-    t.write(c,"\n")
+    t.output.write(c,"\n")
   end
 
-  t.write(("-time: %.1f s"):format(sys.gettime() - stime).."\n")
+  t.output.write(("-time: %.1f s"):format(sys.gettime() - stime).."\n")
 end
 
 
@@ -33,7 +33,7 @@ assert(t.initwrap({}, function()
   pr[math.random( 0,8)] = "✔"
   local stime = sys.gettime()
   w.preload(table.concat(pr))
-  t.write(("preload-time: %.1f s"):format(sys.gettime() - stime).."\n")
+  t.output.write(("preload-time: %.1f s"):format(sys.gettime() - stime).."\n")
   test()
   test()
   return true

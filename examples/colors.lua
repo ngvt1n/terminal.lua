@@ -19,7 +19,7 @@ t.textpush{
   fg = "white",
   brightness = "dim",
 }
-t.print("Hello dim white World!")
+t.output.print("Hello dim white World!")
 
 
 t.textpush{
@@ -27,7 +27,7 @@ t.textpush{
   bg = "blue",
   brightness = "normal",
 }
-t.print("Hello white on blue World!")
+t.output.print("Hello white on blue World!")
 
 
 t.textpush{
@@ -35,18 +35,18 @@ t.textpush{
   bg = "black",
   brightness = "bright",
 }
-t.print("Hello bright red World!")
+t.output.print("Hello bright red World!")
 
 -- Unwind the stack, and restore text attributes along the way
 t.textpop()
-t.print("Hello white on blue World! (again)")
+t.output.print("Hello white on blue World! (again)")
 
 t.textpop()
-t.print("Hello dim white World! (again)")
+t.output.print("Hello dim white World! (again)")
 
 t.textpop()
-t.write("Press any key, or wait 5 seconds...")
-t.flush()
+t.output.write("Press any key, or wait 5 seconds...")
+t.output.flush()
 t.input.readansi(5)
 
 -- restore all settings (reverts to original screen buffer)

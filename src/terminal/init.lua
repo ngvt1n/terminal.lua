@@ -31,88 +31,13 @@ local sys = require "system"
 local t -- the terminal/stream to operate on, default io.stderr
 local bsleep  -- a blocking sleep function
 local asleep   -- a (optionally) non-blocking sleep function
+
+
+-- load submodules
 local input = require "terminal.input"
 M.input = input
-
-
---=============================================================================
--- Stream support
---=============================================================================
-
---- Stream support.
--- Shortcuts to the stream used, with buffer overrun protection.
--- @section stream
-
-do
-  local chunksize = 512 -- chunk size to write in one go
-  local bytecount_left = chunksize -- number of bytes to write before flush+sleep required
-  local delay = 0.001 -- delay in seconds after each chunk write
-  local Sequence = require("terminal.sequence")
-
-  --- Writes to the stream in chunks.
-  -- Parameters are written to the stream, and flushed after each chunk. A small sleep is
-  -- added after each chunk to allow the terminal to process the data.
-  -- This is done to prevent the terminal buffer from overrunning and dropping data.
-  --
-  -- Important differences:
-  -- - functions will be called and their first return value will be used.
-  -- - parameters will be written without tabs separating them.
-  -- @param ... the values to write
-  -- @return the return value of the stream's `write` function
-  -- @within stream
-  function M.write(...)
-    local data = tostring(Sequence(...))
-    if data == "" then
-      return t:write(data) -- ensure we return the same return values as the stream's write function
-    end
-
-    -- write to stream, in chunks. flush and sleep in between
-    local ok, err
-    while #data > 0 do
-      local chunk = data:sub(1, bytecount_left)
-      data = data:sub(bytecount_left + 1)
-
-      ok, err = t:write(chunk)
-      if not ok then
-        return ok, err
-      end
-
-      bytecount_left = bytecount_left - #chunk
-      if bytecount_left <= 0 then
-        bytecount_left = chunksize
-        t:flush()
-        -- sleep a bit to allow the terminal to process the data
-        bsleep(delay) -- blocking because we do not want to yield!
-      end
-    end
-
-    return ok, err
-  end
-end
-
-
-
---- Prints to the stream in chunks.
--- Same as `write`, but adds a newline at the end.
--- @param ... the values to write
--- @return the return value of the stream's `write` function
--- @within stream
-function M.print(...)
-  local ok, err = M.write(...)
-  if not ok then
-    return ok, err
-  end
-  return M.write("\n")
-end
-
-
-
---- Flushes the stream.
--- @return the return value of the stream's `flush` function
--- @within stream
-function M.flush()
-  return t:flush()
-end
+local output = require "terminal.output"
+M.output = output
 
 
 --=============================================================================
@@ -142,7 +67,7 @@ end
 -- @return true
 -- @within cursor_shapes
 function M.visible(visible)
-  M.write(M.visibles(visible))
+  output.write(M.visibles(visible))
   return true
 end
 
@@ -179,7 +104,7 @@ end
 -- @return true
 -- @within cursor_shapes
 function M.shape(shape)
-  M.write(shapes[shape])
+  output.write(shapes[shape])
   return true
 end
 
@@ -206,7 +131,7 @@ end
 -- @return true
 -- @within cursor_shape_stack
 function M.visible_apply()
-  M.write(M.visible_applys())
+  output.write(M.visible_applys())
   return true
 end
 
@@ -224,7 +149,7 @@ end
 -- @return true
 -- @within cursor_shape_stack
 function M.visible_push(visible)
-  M.write(M.visible_pushs(visible))
+  output.write(M.visible_pushs(visible))
   return true
 end
 
@@ -245,7 +170,7 @@ end
 -- @return true
 -- @within cursor_shape_stack
 function M.visible_pop(n)
-  M.write(M.visible_pops(n))
+  output.write(M.visible_pops(n))
   return true
 end
 
@@ -268,7 +193,7 @@ end
 -- @return true
 -- @within cursor_shape_stack
 function M.shape_apply()
-  M.write(_shapestack[#_shapestack])
+  output.write(_shapestack[#_shapestack])
   return true
 end
 
@@ -288,7 +213,7 @@ end
 -- @return true
 -- @within cursor_shape_stack
 function M.shape_push(shape)
-  M.write(M.shape_pushs(shape))
+  output.write(M.shape_pushs(shape))
   return true
 end
 
@@ -309,7 +234,7 @@ end
 -- @return true
 -- @within cursor_shape_stack
 function M.shape_pop(n)
-  M.write(M.shape_pops(n))
+  output.write(M.shape_pops(n))
   return true
 end
 
@@ -331,7 +256,7 @@ end
 
 --- write the sequence for requesting cursor position, without flushing
 function M.cursor_get_query()
-  M.write(M.cursor_get_querys())
+  output.write(M.cursor_get_querys())
 end
 
 
@@ -376,7 +301,7 @@ end
 -- @return true
 -- @within cursor_position
 function M.cursor_save()
-  M.write(M.cursor_saves())
+  output.write(M.cursor_saves())
   return true
 end
 
@@ -391,7 +316,7 @@ end
 -- @return true
 -- @within cursor_position
 function M.cursor_restore()
-  M.write(M.cursor_restores())
+  output.write(M.cursor_restores())
   return true
 end
 
@@ -410,7 +335,7 @@ end
 -- @return true
 -- @within cursor_position
 function M.cursor_set(row, column)
-  M.write(M.cursor_sets(row, column))
+  output.write(M.cursor_sets(row, column))
   return true
 end
 
@@ -441,7 +366,7 @@ end
 -- @return true
 -- @within cursor_position_stack
 function M.cursor_push(row, column)
-  M.write(M.cursor_pushs(row, column))
+  output.write(M.cursor_pushs(row, column))
   return true
 end
 
@@ -467,7 +392,7 @@ end
 -- @return true
 -- @within cursor_position_stack
 function M.cursor_pop(n)
-  M.write(M.cursor_pops(n))
+  output.write(M.cursor_pops(n))
   return true
 end
 
@@ -492,7 +417,7 @@ end
 -- @return true
 -- @within cursor_moving
 function M.cursor_up(n)
-  M.write(M.cursor_ups(n))
+  output.write(M.cursor_ups(n))
   return true
 end
 
@@ -510,7 +435,7 @@ end
 -- @return true
 -- @within cursor_moving
 function M.cursor_down(n)
-  M.write(M.cursor_downs(n))
+  output.write(M.cursor_downs(n))
   return true
 end
 
@@ -531,7 +456,7 @@ end
 -- @return true
 -- @within cursor_moving
 function M.cursor_vertical(n)
-  M.write(M.cursor_verticals(n))
+  output.write(M.cursor_verticals(n))
   return true
 end
 
@@ -549,7 +474,7 @@ end
 -- @return true
 -- @within cursor_moving
 function M.cursor_left(n)
-  M.write(M.cursor_lefts(n))
+  output.write(M.cursor_lefts(n))
   return true
 end
 
@@ -567,7 +492,7 @@ end
 -- @return true
 -- @within cursor_moving
 function M.cursor_right(n)
-  M.write(M.cursor_rights(n))
+  output.write(M.cursor_rights(n))
   return true
 end
 
@@ -588,7 +513,7 @@ end
 -- @return true
 -- @within cursor_moving
 function M.cursor_horizontal(n)
-  M.write(M.cursor_horizontals(n))
+  output.write(M.cursor_horizontals(n))
   return true
 end
 
@@ -607,7 +532,7 @@ end
 -- @return true
 -- @within cursor_moving
 function M.cursor_move(rows, columns)
-  M.write(M.cursor_moves(rows, columns))
+  output.write(M.cursor_moves(rows, columns))
   return true
 end
 
@@ -698,7 +623,7 @@ end
 -- @return true
 -- @within clearing
 function M.clear()
-  M.write(M.clears())
+  output.write(M.clears())
   return true
 end
 
@@ -713,7 +638,7 @@ end
 -- @return true
 -- @within clearing
 function M.clear_top()
-  M.write(M.clear_tops())
+  output.write(M.clear_tops())
   return true
 end
 
@@ -728,7 +653,7 @@ end
 -- @return true
 -- @within clearing
 function M.clear_bottom()
-  M.write(M.clear_bottoms())
+  output.write(M.clear_bottoms())
   return true
 end
 
@@ -743,7 +668,7 @@ end
 -- @return true
 -- @within clearing
 function M.clear_line()
-  M.write(M.clear_lines())
+  output.write(M.clear_lines())
   return true
 end
 
@@ -758,7 +683,7 @@ end
 -- @return true
 -- @within clearing
 function M.clear_start()
-  M.write(M.clear_starts())
+  output.write(M.clear_starts())
   return true
 end
 
@@ -773,7 +698,7 @@ end
 -- @return true
 -- @within clearing
 function M.clear_end()
-  M.write(M.clear_ends())
+  output.write(M.clear_ends())
   return true
 end
 
@@ -796,7 +721,7 @@ end
 -- @treturn string ansi sequence to write to the terminal
 -- @within clearing
 function M.clear_box(height, width)
-  M.write(M.clear_boxs(height, width))
+  output.write(M.clear_boxs(height, width))
   return true
 end
 
@@ -832,7 +757,7 @@ end
 -- @return true
 -- @within scrolling
 function M.scroll_region(top, bottom)
-  M.write(M.scroll_regions(top, bottom))
+  output.write(M.scroll_regions(top, bottom))
   return true
 end
 
@@ -850,7 +775,7 @@ end
 -- @return true
 -- @within scrolling
 function M.scroll_up(n)
-  M.write(M.scroll_ups(n))
+  output.write(M.scroll_ups(n))
   return true
 end
 
@@ -868,7 +793,7 @@ end
 -- @return true
 -- @within scrolling
 function M.scroll_down(n)
-  M.write(M.scroll_downs(n))
+  output.write(M.scroll_downs(n))
   return true
 end
 
@@ -888,7 +813,7 @@ end
 -- @return true
 -- @within scrolling
 function M.scroll_(n)
-  M.write(M.scroll_s(n))
+  output.write(M.scroll_s(n))
   return true
 end
 
@@ -910,7 +835,7 @@ end
 -- @return true
 -- @within scrolling_region
 function M.scroll_apply()
-  M.write(_scrollstack[#_scrollstack])
+  output.write(_scrollstack[#_scrollstack])
   return true
 end
 
@@ -932,7 +857,7 @@ end
 -- @return true
 -- @within scrolling_region
 function M.scroll_push(top, bottom)
-  M.write(M.scroll_pushs(top, bottom))
+  output.write(M.scroll_pushs(top, bottom))
   return true
 end
 
@@ -953,7 +878,7 @@ end
 -- @return true
 -- @within scrolling_region
 function M.scroll_pop(n)
-  M.write(M.scroll_pops(n))
+  output.write(M.scroll_pops(n))
   return true
 end
 
@@ -1078,7 +1003,7 @@ end
 -- @return true
 -- @within textcolor
 function M.color_fg(r, g, b)
-  M.write(M.color_fgs(r, g, b))
+  output.write(M.color_fgs(r, g, b))
   return true
 end
 
@@ -1105,7 +1030,7 @@ end
 -- @return true
 -- @within textcolor
 function M.color_bg(r, g, b)
-  M.write(M.color_bgs(r, g, b))
+  output.write(M.color_bgs(r, g, b))
   return true
 end
 
@@ -1120,7 +1045,7 @@ end
 -- @return true
 -- @within textcolor
 function M.underline_on()
-  M.write(M.underline_ons())
+  output.write(M.underline_ons())
   return true
 end
 
@@ -1135,7 +1060,7 @@ end
 -- @return true
 -- @within textcolor
 function M.underline_off()
-  M.write(M.underline_offs())
+  output.write(M.underline_offs())
   return true
 end
 
@@ -1150,7 +1075,7 @@ end
 -- @return true
 -- @within textcolor
 function M.blink_on()
-  M.write(M.blink_ons())
+  output.write(M.blink_ons())
   return true
 end
 
@@ -1165,7 +1090,7 @@ end
 -- @return true
 -- @within textcolor
 function M.blink_off()
-  M.write(M.blink_offs())
+  output.write(M.blink_offs())
   return true
 end
 
@@ -1180,7 +1105,7 @@ end
 -- @return true
 -- @within textcolor
 function M.reverse_on()
-  M.write(M.reverse_ons())
+  output.write(M.reverse_ons())
   return true
 end
 
@@ -1195,7 +1120,7 @@ end
 -- @return true
 -- @within textcolor
 function M.reverse_off()
-  M.write(M.reverse_offs())
+  output.write(M.reverse_offs())
   return true
 end
 
@@ -1267,7 +1192,7 @@ end
 -- @return true
 -- @within textcolor
 function M.brightness(brightness)
-  M.write(M.brightnesss(brightness))
+  output.write(M.brightnesss(brightness))
   return true
 end
 
@@ -1329,7 +1254,7 @@ end
 -- @return true
 -- @within textcolor_stack
 function M.textset(attr)
-  M.write(newtext(attr).ansi)
+  output.write(newtext(attr).ansi)
   return true
 end
 
@@ -1350,7 +1275,7 @@ end
 -- @return true
 -- @within textcolor_stack
 function M.textpush(attr)
-  M.write(M.textpushs(attr))
+  output.write(M.textpushs(attr))
   return true
 end
 
@@ -1372,7 +1297,7 @@ end
 -- @return true
 -- @within textcolor_stack
 function M.textpop(n)
-  M.write(M.textpops(n))
+  output.write(M.textpops(n))
   return true
 end
 
@@ -1387,7 +1312,7 @@ end
 -- @return true
 -- @within textcolor_stack
 function M.textapply()
-  M.write(_colorstack[#_colorstack].ansi)
+  output.write(_colorstack[#_colorstack].ansi)
   return true
 end
 
@@ -1423,7 +1348,7 @@ end
 -- @return true
 -- @within lines
 function M.line_horizontal(n, char)
-  M.write(M.line_horizontals(n, char))
+  output.write(M.line_horizontals(n, char))
   return true
 end
 
@@ -1449,7 +1374,7 @@ end
 -- @return true
 -- @within lines
 function M.line_vertical(n, char)
-  M.write(M.line_verticals(n, char))
+  output.write(M.line_verticals(n, char))
   return true
 end
 
@@ -1508,7 +1433,7 @@ end
 -- @return true
 -- @within lines
 function M.line_title(title, width, char, pre, post)
-  M.write(M.line_titles(title, width, char, pre, post))
+  output.write(M.line_titles(title, width, char, pre, post))
   return true
 end
 
@@ -1637,7 +1562,7 @@ end
 -- @return true
 -- @within lines
 function M.box(height, width, format, clear, title, lastcolumn)
-  M.write(M.boxs(height, width, format, clear, title, lastcolumn))
+  output.write(M.boxs(height, width, format, clear, title, lastcolumn))
   return true
 end
 
@@ -1658,7 +1583,7 @@ end
 --- Write a sequence to the terminal to make it beep.
 -- @return true
 function M.beep()
-  M.write(M.beep())
+  output.write(M.beep())
   return true
 end
 
@@ -1706,6 +1631,7 @@ do
     bsleep = opts.bsleep or sys.sleep
     assert(type(bsleep) == "function", "invalid opts.bsleep function, expected a function, got " .. type(opts.bsleep))
     input.set_bsleep(bsleep)
+    output.set_bsleep(bsleep)
 
     asleep = opts.sleep or sys.sleep
     assert(type(asleep) == "function", "invalid opts.sleep function, expected a function, got " .. type(opts.sleep))
@@ -1713,7 +1639,7 @@ do
 
     termbackup = sys.termbackup()
     if opts.displaybackup then
-      M.write(savescreen)
+      output.write(savescreen)
       termbackup.displaybackup = true
     end
 
@@ -1742,7 +1668,7 @@ do
 
     -- restore all stacks
     local r,c = M.cursor_get() -- Mac: scroll-region reset changes cursor pos to 1,1, so store it
-    M.write(
+    output.write(
       M.shape_pops(math.huge),
       M.visible_pops(math.huge),
       M.textpops(math.huge),
@@ -1752,10 +1678,10 @@ do
     t:flush()
 
     if termbackup.displaybackup then
-      M.write(restorescreen)
+      output.write(restorescreen)
       t:flush()
     end
-    M.write(reset)
+    output.write(reset)
     t:flush()
 
     sys.termrestore(termbackup)
