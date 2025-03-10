@@ -21,15 +21,14 @@ local bsleep = sys.sleep -- sleep function that blocks
 local chunksize = 512 -- chunk size to write in one go
 local bytecount_left = chunksize -- number of bytes to write before flush+sleep required
 local delay = 0.001 -- delay in seconds after each chunk write
-local Sequence = require("terminal.sequence")
 
 
 
-local pack, unpack do
+local pack do
   -- nil-safe versions of pack/unpack
   local oldunpack = _G.unpack or table.unpack -- luacheck: ignore
   pack = function(...) return { n = select("#", ...), ... } end
-  unpack = function(t, i, j) return oldunpack(t, i or 1, j or t.n or #t) end
+  --unpack = function(t, i, j) return oldunpack(t, i or 1, j or t.n or #t) end
 end
 
 
@@ -67,16 +66,21 @@ end
 -- added after each chunk to allow the terminal to process the data.
 -- This is done to prevent the terminal buffer from overrunning and dropping data.
 --
--- Important differences:
--- - functions will be called and their first return value will be used.
--- - parameters will be written without tabs separating them.
+-- Differences from the standard Lua write function:
+--
+-- - parameters will be tostring-ed before writing
 -- @param ... the values to write
 -- @return the return value of the stream's `write` function
 function M.write(...)
-  local data = tostring(Sequence(...))
-  if data == "" then
-    return t:write(data) -- ensure we return the same return values as the stream's write function
+  local args = pack(...)
+  if args.n == 0 then
+    return t:write("") -- ensure we return the same return values as the stream's write function
   end
+
+  for i = 1, args.n do
+    args[i] = tostring(args[i])
+  end
+  local data = table.concat(args)
 
   -- write to stream, in chunks. flush and sleep in between
   local ok, err
@@ -104,15 +108,14 @@ end
 
 
 --- Prints to the stream in chunks.
--- Same as `write`, but adds a newline at the end.
+-- A `print` compatible function that safely writes output to the stream.
 -- @param ... the values to write
--- @return the return value of the stream's `write` function
 function M.print(...)
-  local ok, err = M.write(...)
-  if not ok then
-    return ok, err
+  local args = pack(...)
+  for i = 1, args.n do
+    args[i] = tostring(args[i])
   end
-  return M.write("\n")
+  M.write(table.concat(args, "\t"), "\n")
 end
 
 
