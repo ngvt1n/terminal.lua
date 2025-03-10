@@ -24,7 +24,7 @@ local sys = require "system"
 -- No colors or cursor positioning/moving back is involved.
 local function test_width_by_writing(char)
   local _, start_column = t.cursor_get()
-  t.write(char)
+  t.output.write(char)
   local _, end_column = t.cursor_get()
   if end_column < start_column then
     -- cursor wrapped to next line
@@ -50,7 +50,7 @@ function M.write_cwidth(char)
   local w = char_widths[char]
   if w then
     -- we have a cached width
-    t.write(char)
+    t.output.write(char)
     return w
   end
 
@@ -177,7 +177,7 @@ function M.preload(str)
     chunk[#chunk+1] = s
     if #chunk == size or i == #test then
       -- handle the chunk
-      t.write(table.concat(chunk))
+      t.output.write(table.concat(chunk))
       local positions, err = t.input.read_cursor_pos(#chunk)
       if not positions then
         t.textpop() -- restore color (drop hidden)

@@ -37,17 +37,17 @@ local top2 = Sequence(
 t.initialize()
 
 -- print the green checkmarks, by default this will be on a black background
-t.print(greencheck, " hello ", greencheck, " world ", greencheck) -- uses normal colors for the text
+t.output.print(greencheck, " hello ", greencheck, " world ", greencheck) -- uses normal colors for the text
 -- change background to red, and print again, the same sequence now properly prints on a red background
 t.textpush({ bg = "red" })
-t.write(greencheck, " hello ", greencheck, " world ", greencheck) -- text is on red background now
+t.output.write(greencheck, " hello ", greencheck, " world ", greencheck) -- text is on red background now
 t.textpop() -- whilst the cursor is still on the same line, otherwise if scrolling the scrolled line will be red!
-t.print() -- push the newline
+t.output.print() -- push the newline
 -- print again, and the background is back to black
-t.print(greencheck, " hello ", greencheck, " world ", greencheck) -- text is back to normal colors
+t.output.print(greencheck, " hello ", greencheck, " world ", greencheck) -- text is back to normal colors
 
 -- print the green checkmark at the top of the screen
-t.write(top)
-t.write(top2) -- anotheer one at pos 2,2
+t.output.write(top)
+t.output.write(top2) -- anotheer one at pos 2,2
 
 t.shutdown()

@@ -132,7 +132,7 @@ function M.spinner(opts)
         end
       end
 
-      t.write(steps[step])
+      t.output.write(steps[step])
     end
   end
 end
