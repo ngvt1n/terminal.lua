@@ -19,6 +19,7 @@ local M = {
   _DESCRIPTION = "Cross platform terminal library for Lua (Windows/Unix/Mac)",
 }
 
+
 local pack, unpack do
   -- nil-safe versions of pack/unpack
   local oldunpack = _G.unpack or table.unpack -- luacheck: ignore
@@ -47,6 +48,10 @@ local scroll = M.scroll
 local t -- the terminal/stream to operate on, default io.stderr
 local bsleep  -- a blocking sleep function
 local asleep   -- a (optionally) non-blocking sleep function
+
+
+
+
 
 
 
@@ -332,6 +337,10 @@ end
 -- @treturn string ansi sequence to write to the terminal
 -- @within cursor_position
 function M.cursor_sets(row, column)
+  -- Resolve negative indices
+  local rows, cols = sys.termsize()
+  row = utils.resolve_index(row, rows)
+  column = utils.resolve_index(column, cols)
   return "\27[" .. tostring(row) .. ";" .. tostring(column) .. "H"
 end
 
