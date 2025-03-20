@@ -44,7 +44,7 @@ jobs:
 
       - name: test
         run: |
-          make testinst BUSTED='--coverage --Xoutput "--color"'
+          make test BUSTED='--coverage --Xoutput "--color"'
 
       - name: Report test coverage
         if: success()
