@@ -87,7 +87,7 @@ The sources can be found in the ldoc configuration file; `config.ld`.
 
 Please note that the generated documentation is only updated upon releasing. During development update comments, examples, etc. But do not commit any changes to the rendered documentation.
 
-Use the `Makefile` to generate the documentation (`make docs`), and to clean it (`make clean) in case you tested the generated docs but need to revert before comitting.
+Use the `Makefile` to generate the documentation (`make docs`), and to clean it (`make clean`) in case you tested the generated docs but need to revert before comitting.
 
 
 
