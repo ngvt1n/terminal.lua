@@ -57,7 +57,7 @@ function TerminalUI:cycleColor(isBackground)
     self.contentStyle.fg = colors[self.currentFgColorIndex]
   end
 
-  t.text.attr(self.contentStyle)
+  t.text.attrs(self.contentStyle)
   self:refreshDisplay()
 end
 
@@ -146,7 +146,7 @@ end
 function TerminalUI:initializeContent()
   local rows, cols = sys.termsize()
 
-  t.text.attr(self.contentStyle)
+  t.text.attrs(self.contentStyle)
 
   for i = 2, rows - 1 do
     t.cursor.position.set(i, 1)
