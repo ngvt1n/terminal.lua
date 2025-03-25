@@ -38,6 +38,10 @@ end
 local colors = {
   "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"
 }
+local rcolors = {}
+for index, color in ipairs(colors) do
+  rcolors[color] = index
+end
 
 -- TUI classes
 local TerminalUIApp = {}
@@ -93,10 +97,10 @@ function TextArea:new(options)
     parent_app = options.parent_app,
     cursorY = 2,
     cursorX = 2,
-    indexFg = 3,
-    indexBg = 1,
-    style = options.style or { fg = "blue", bg = "blue", brightness = "normal" },
+    style = options.style or { fg = "green", bg = "black", brightness = "normal" },
   }
+  instance.currentFgColorIndex = instance.style.fg and rcolors[instance.style.fg] or 3
+  instance.currentBgColorIndex = instance.style.bg and rcolors[instance.style.bg] or 1
   setmetatable(instance, { __index = self })
   return instance
 end
