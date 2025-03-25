@@ -84,7 +84,6 @@
   <li><a href="../examples/readline.lua.html">readline.lua</a></li>
   <li><a href="../examples/sequence.lua.html">sequence.lua</a></li>
   <li><a href="../examples/testscreen.lua.html">testscreen.lua</a></li>
-  <li><a href="../examples/unicode_width.lua.html">unicode_width.lua</a></li>
 </ul>
 
 </div>
@@ -114,15 +113,15 @@
 <h2><a href="#Sequences">Sequences</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#horizontals">horizontals (n[, char="─"])</a></td>
+	<td class="name" nowrap><a href="#horizontal_seq">horizontal_seq (n[, char="─"])</a></td>
 	<td class="summary">Creates a sequence to draw a horizontal line without writing it to the terminal.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#titles">titles (width[, title=""[, char="─"[, pre=""[, post=""]]]])</a></td>
+	<td class="name" nowrap><a href="#title_seq">title_seq (width[, title=""[, char="─"[, pre=""[, post=""]]]])</a></td>
 	<td class="summary">Creates a sequence to draw a horizontal line with a title centered in it without writing it to the terminal.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#verticals">verticals (n[, char="│"[, lastcolumn]])</a></td>
+	<td class="name" nowrap><a href="#vertical_seq">vertical_seq (n[, char="│"[, lastcolumn]])</a></td>
 	<td class="summary">Creates a sequence to draw a vertical line without writing it to the terminal.</td>
 	</tr>
 </table>
@@ -257,8 +256,8 @@
 
     <dl class="function">
     <dt>
-    <a name = "horizontals"></a>
-    <strong>horizontals (n[, char="─"])</strong>
+    <a name = "horizontal_seq"></a>
+    <strong>horizontal_seq (n[, char="─"])</strong>
     </dt>
     <dd>
     Creates a sequence to draw a horizontal line without writing it to the terminal.
@@ -292,8 +291,8 @@
 
 </dd>
     <dt>
-    <a name = "titles"></a>
-    <strong>titles (width[, title=""[, char="─"[, pre=""[, post=""]]]])</strong>
+    <a name = "title_seq"></a>
+    <strong>title_seq (width[, title=""[, char="─"[, pre=""[, post=""]]]])</strong>
     </dt>
     <dd>
     Creates a sequence to draw a horizontal line with a title centered in it without writing it to the terminal.
@@ -341,8 +340,8 @@
 
 </dd>
     <dt>
-    <a name = "verticals"></a>
-    <strong>verticals (n[, char="│"[, lastcolumn]])</strong>
+    <a name = "vertical_seq"></a>
+    <strong>vertical_seq (n[, char="│"[, lastcolumn]])</strong>
     </dt>
     <dd>
     Creates a sequence to draw a vertical line without writing it to the terminal.

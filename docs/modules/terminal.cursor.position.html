@@ -84,7 +84,6 @@
   <li><a href="../examples/readline.lua.html">readline.lua</a></li>
   <li><a href="../examples/sequence.lua.html">sequence.lua</a></li>
   <li><a href="../examples/testscreen.lua.html">testscreen.lua</a></li>
-  <li><a href="../examples/unicode_width.lua.html">unicode_width.lua</a></li>
 </ul>
 
 </div>
@@ -158,55 +157,55 @@
 <h2><a href="#Sequences">Sequences</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#backups">backups ()</a></td>
+	<td class="name" nowrap><a href="#backup_seq">backup_seq ()</a></td>
 	<td class="summary">Returns the ansi sequence to backup the current cursor position (in terminal storage, not stacked).</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#columns">columns (column)</a></td>
+	<td class="name" nowrap><a href="#column_seq">column_seq (column)</a></td>
 	<td class="summary">Creates an ansi sequence to move the cursor to a column on the current row without writing it to the terminal.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#downs">downs ([n=1])</a></td>
+	<td class="name" nowrap><a href="#down_seq">down_seq ([n=1])</a></td>
 	<td class="summary">Creates an ansi sequence to move the cursor down without writing it to the terminal.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#horizontals">horizontals ([n=1])</a></td>
+	<td class="name" nowrap><a href="#horizontal_seq">horizontal_seq ([n=1])</a></td>
 	<td class="summary">Creates an ansi sequence to move the cursor horizontally without writing it to the terminal.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#lefts">lefts ([n=1])</a></td>
+	<td class="name" nowrap><a href="#left_seq">left_seq ([n=1])</a></td>
 	<td class="summary">Creates an ansi sequence to move the cursor left without writing it to the terminal.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#moves">moves ([rows=0[, columns=0]])</a></td>
+	<td class="name" nowrap><a href="#move_seq">move_seq ([rows=0[, columns=0]])</a></td>
 	<td class="summary">Creates an ansi sequence to move the cursor horizontal and vertical without writing it to the terminal.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#querys">querys ()</a></td>
+	<td class="name" nowrap><a href="#query_seq">query_seq ()</a></td>
 	<td class="summary">returns the sequence for requesting cursor position as a string.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#restores">restores ()</a></td>
+	<td class="name" nowrap><a href="#restore_seq">restore_seq ()</a></td>
 	<td class="summary">Returns the ansi sequence to restore the cursor position (from the terminal storage, not stacked).</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#rights">rights ([n=1])</a></td>
+	<td class="name" nowrap><a href="#right_seq">right_seq ([n=1])</a></td>
 	<td class="summary">Creates an ansi sequence to move the cursor right without writing it to the terminal.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#rows">rows (row)</a></td>
+	<td class="name" nowrap><a href="#row_seq">row_seq (row)</a></td>
 	<td class="summary">Creates an ansi sequence to move the cursor to a row on the current column without writing it to the terminal.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#sets">sets (row, column)</a></td>
+	<td class="name" nowrap><a href="#set_seq">set_seq (row, column)</a></td>
 	<td class="summary">Creates ansi sequence to set the cursor position without writing it to the terminal.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#ups">ups ([n=1])</a></td>
+	<td class="name" nowrap><a href="#up_seq">up_seq ([n=1])</a></td>
 	<td class="summary">Creates an ansi sequence to move the cursor up without writing it to the terminal.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#verticals">verticals ([n=1])</a></td>
+	<td class="name" nowrap><a href="#vertical_seq">vertical_seq ([n=1])</a></td>
 	<td class="summary">Creates an ansi sequence to move the cursor vertically without writing it to the terminal.</td>
 	</tr>
 </table>
@@ -597,8 +596,8 @@
 
     <dl class="function">
     <dt>
-    <a name = "backups"></a>
-    <strong>backups ()</strong>
+    <a name = "backup_seq"></a>
+    <strong>backup_seq ()</strong>
     </dt>
     <dd>
     Returns the ansi sequence to backup the current cursor position (in terminal storage, not stacked).
@@ -617,8 +616,8 @@
 
 </dd>
     <dt>
-    <a name = "columns"></a>
-    <strong>columns (column)</strong>
+    <a name = "column_seq"></a>
+    <strong>column_seq (column)</strong>
     </dt>
     <dd>
     Creates an ansi sequence to move the cursor to a column on the current row without writing it to the terminal.
@@ -645,8 +644,8 @@
 
 </dd>
     <dt>
-    <a name = "downs"></a>
-    <strong>downs ([n=1])</strong>
+    <a name = "down_seq"></a>
+    <strong>down_seq ([n=1])</strong>
     </dt>
     <dd>
     Creates an ansi sequence to move the cursor down without writing it to the terminal.
@@ -673,8 +672,8 @@
 
 </dd>
     <dt>
-    <a name = "horizontals"></a>
-    <strong>horizontals ([n=1])</strong>
+    <a name = "horizontal_seq"></a>
+    <strong>horizontal_seq ([n=1])</strong>
     </dt>
     <dd>
     Creates an ansi sequence to move the cursor horizontally without writing it to the terminal.
@@ -701,8 +700,8 @@
 
 </dd>
     <dt>
-    <a name = "lefts"></a>
-    <strong>lefts ([n=1])</strong>
+    <a name = "left_seq"></a>
+    <strong>left_seq ([n=1])</strong>
     </dt>
     <dd>
     Creates an ansi sequence to move the cursor left without writing it to the terminal.
@@ -729,8 +728,8 @@
 
 </dd>
     <dt>
-    <a name = "moves"></a>
-    <strong>moves ([rows=0[, columns=0]])</strong>
+    <a name = "move_seq"></a>
+    <strong>move_seq ([rows=0[, columns=0]])</strong>
     </dt>
     <dd>
     Creates an ansi sequence to move the cursor horizontal and vertical without writing it to the terminal.
@@ -762,8 +761,8 @@
 
 </dd>
     <dt>
-    <a name = "querys"></a>
-    <strong>querys ()</strong>
+    <a name = "query_seq"></a>
+    <strong>query_seq ()</strong>
     </dt>
     <dd>
     returns the sequence for requesting cursor position as a string.
@@ -783,8 +782,8 @@
 
 </dd>
     <dt>
-    <a name = "restores"></a>
-    <strong>restores ()</strong>
+    <a name = "restore_seq"></a>
+    <strong>restore_seq ()</strong>
     </dt>
     <dd>
     Returns the ansi sequence to restore the cursor position (from the terminal storage, not stacked).
@@ -803,8 +802,8 @@
 
 </dd>
     <dt>
-    <a name = "rights"></a>
-    <strong>rights ([n=1])</strong>
+    <a name = "right_seq"></a>
+    <strong>right_seq ([n=1])</strong>
     </dt>
     <dd>
     Creates an ansi sequence to move the cursor right without writing it to the terminal.
@@ -831,8 +830,8 @@
 
 </dd>
     <dt>
-    <a name = "rows"></a>
-    <strong>rows (row)</strong>
+    <a name = "row_seq"></a>
+    <strong>row_seq (row)</strong>
     </dt>
     <dd>
     Creates an ansi sequence to move the cursor to a row on the current column without writing it to the terminal.
@@ -859,8 +858,8 @@
 
 </dd>
     <dt>
-    <a name = "sets"></a>
-    <strong>sets (row, column)</strong>
+    <a name = "set_seq"></a>
+    <strong>set_seq (row, column)</strong>
     </dt>
     <dd>
     Creates ansi sequence to set the cursor position without writing it to the terminal.
@@ -892,8 +891,8 @@
 
 </dd>
     <dt>
-    <a name = "ups"></a>
-    <strong>ups ([n=1])</strong>
+    <a name = "up_seq"></a>
+    <strong>up_seq ([n=1])</strong>
     </dt>
     <dd>
     Creates an ansi sequence to move the cursor up without writing it to the terminal.
@@ -920,8 +919,8 @@
 
 </dd>
     <dt>
-    <a name = "verticals"></a>
-    <strong>verticals ([n=1])</strong>
+    <a name = "vertical_seq"></a>
+    <strong>vertical_seq ([n=1])</strong>
     </dt>
     <dd>
     Creates an ansi sequence to move the cursor vertically without writing it to the terminal.

@@ -84,7 +84,6 @@
   <li><a href="../examples/readline.lua.html">readline.lua</a></li>
   <li><a href="../examples/sequence.lua.html">sequence.lua</a></li>
   <li><a href="../examples/testscreen.lua.html">testscreen.lua</a></li>
-  <li><a href="../examples/unicode_width.lua.html">unicode_width.lua</a></li>
 </ul>
 
 </div>
@@ -122,23 +121,23 @@
 <h2><a href="#Sequences">Sequences</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#attrs">attrs (attr)</a></td>
+	<td class="name" nowrap><a href="#attr_seq">attr_seq (attr)</a></td>
 	<td class="summary">Creates an ansi sequence to set all text attributes/colors without writing it to the terminal.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#blinks">blinks ([on=true])</a></td>
+	<td class="name" nowrap><a href="#blink_seq">blink_seq ([on=true])</a></td>
 	<td class="summary">Creates an ansi sequence to (un)set the blink attribute without writing it to the terminal.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#brightnesss">brightnesss (brightness)</a></td>
+	<td class="name" nowrap><a href="#brightness_seq">brightness_seq (brightness)</a></td>
 	<td class="summary">Creates an ansi sequence to set the brightness without writing it to the terminal.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#reverses">reverses ([on=true])</a></td>
+	<td class="name" nowrap><a href="#reverse_seq">reverse_seq ([on=true])</a></td>
 	<td class="summary">Creates an ansi sequence to (un)set the reverse attribute without writing it to the terminal.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#underlines">underlines ([on=true])</a></td>
+	<td class="name" nowrap><a href="#underline_seq">underline_seq ([on=true])</a></td>
 	<td class="summary">Creates an ansi sequence to (un)set the underline attribute without writing it to the terminal.</td>
 	</tr>
 </table>
@@ -163,7 +162,7 @@
     <ul>
         <li><span class="parameter">attr</span>
             <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
-         the attributes to set, see <a href="../modules/terminal.text.html#attrs">attrs</a> for details.
+         the attributes to set, see <code>attrs</code> for details.
         </li>
     </ul>
 
@@ -300,8 +299,8 @@
 
     <dl class="function">
     <dt>
-    <a name = "attrs"></a>
-    <strong>attrs (attr)</strong>
+    <a name = "attr_seq"></a>
+    <strong>attr_seq (attr)</strong>
     </dt>
     <dd>
     Creates an ansi sequence to set all text attributes/colors without writing it to the terminal.
@@ -398,8 +397,8 @@
 
 </dd>
     <dt>
-    <a name = "blinks"></a>
-    <strong>blinks ([on=true])</strong>
+    <a name = "blink_seq"></a>
+    <strong>blink_seq ([on=true])</strong>
     </dt>
     <dd>
     Creates an ansi sequence to (un)set the blink attribute without writing it to the terminal.
@@ -426,8 +425,8 @@
 
 </dd>
     <dt>
-    <a name = "brightnesss"></a>
-    <strong>brightnesss (brightness)</strong>
+    <a name = "brightness_seq"></a>
+    <strong>brightness_seq (brightness)</strong>
     </dt>
     <dd>
 
@@ -464,8 +463,8 @@
 
 </dd>
     <dt>
-    <a name = "reverses"></a>
-    <strong>reverses ([on=true])</strong>
+    <a name = "reverse_seq"></a>
+    <strong>reverse_seq ([on=true])</strong>
     </dt>
     <dd>
     Creates an ansi sequence to (un)set the reverse attribute without writing it to the terminal.
@@ -492,8 +491,8 @@
 
 </dd>
     <dt>
-    <a name = "underlines"></a>
-    <strong>underlines ([on=true])</strong>
+    <a name = "underline_seq"></a>
+    <strong>underline_seq ([on=true])</strong>
     </dt>
     <dd>
     Creates an ansi sequence to (un)set the underline attribute without writing it to the terminal.

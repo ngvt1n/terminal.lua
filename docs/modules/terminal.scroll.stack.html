@@ -84,7 +84,6 @@
   <li><a href="../examples/readline.lua.html">readline.lua</a></li>
   <li><a href="../examples/sequence.lua.html">sequence.lua</a></li>
   <li><a href="../examples/testscreen.lua.html">testscreen.lua</a></li>
-  <li><a href="../examples/unicode_width.lua.html">unicode_width.lua</a></li>
 </ul>
 
 </div>
@@ -114,15 +113,15 @@
 <h2><a href="#Sequences">Sequences</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#applys">applys ()</a></td>
+	<td class="name" nowrap><a href="#apply_seq">apply_seq ()</a></td>
 	<td class="summary">Retrieves the current scroll region sequence from the top of the stack.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#pops">pops (n)</a></td>
+	<td class="name" nowrap><a href="#pop_seq">pop_seq (n)</a></td>
 	<td class="summary">Pops the specified number of scroll regions from the stack without applying it.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#pushs">pushs (top, bottom)</a></td>
+	<td class="name" nowrap><a href="#push_seq">push_seq (top, bottom)</a></td>
 	<td class="summary">Pushes a new scroll region onto the stack without applying it.</td>
 	</tr>
 </table>
@@ -217,8 +216,8 @@
 
     <dl class="function">
     <dt>
-    <a name = "applys"></a>
-    <strong>applys ()</strong>
+    <a name = "apply_seq"></a>
+    <strong>apply_seq ()</strong>
     </dt>
     <dd>
     Retrieves the current scroll region sequence from the top of the stack.
@@ -237,8 +236,8 @@
 
 </dd>
     <dt>
-    <a name = "pops"></a>
-    <strong>pops (n)</strong>
+    <a name = "pop_seq"></a>
+    <strong>pop_seq (n)</strong>
     </dt>
     <dd>
     Pops the specified number of scroll regions from the stack without applying it.
@@ -264,8 +263,8 @@
 
 </dd>
     <dt>
-    <a name = "pushs"></a>
-    <strong>pushs (top, bottom)</strong>
+    <a name = "push_seq"></a>
+    <strong>push_seq (top, bottom)</strong>
     </dt>
     <dd>
     Pushes a new scroll region onto the stack without applying it.

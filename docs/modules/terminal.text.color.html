@@ -84,7 +84,6 @@
   <li><a href="../examples/readline.lua.html">readline.lua</a></li>
   <li><a href="../examples/sequence.lua.html">sequence.lua</a></li>
   <li><a href="../examples/testscreen.lua.html">testscreen.lua</a></li>
-  <li><a href="../examples/unicode_width.lua.html">unicode_width.lua</a></li>
 </ul>
 
 </div>
@@ -110,11 +109,11 @@
 <h2><a href="#Sequences">Sequences</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#backs">backs (r[, g[, b]])</a></td>
+	<td class="name" nowrap><a href="#back_seq">back_seq (r[, g[, b]])</a></td>
 	<td class="summary">Creates an ansi sequence to set the background color without writing it to the terminal.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#fores">fores (r[, g[, b]])</a></td>
+	<td class="name" nowrap><a href="#fore_seq">fore_seq (r[, g[, b]])</a></td>
 	<td class="summary">Creates an ansi sequence to set the foreground color without writing it to the terminal.</td>
 	</tr>
 </table>
@@ -203,8 +202,8 @@
 
     <dl class="function">
     <dt>
-    <a name = "backs"></a>
-    <strong>backs (r[, g[, b]])</strong>
+    <a name = "back_seq"></a>
+    <strong>back_seq (r[, g[, b]])</strong>
     </dt>
     <dd>
 
@@ -250,8 +249,8 @@
 
 </dd>
     <dt>
-    <a name = "fores"></a>
-    <strong>fores (r[, g[, b]])</strong>
+    <a name = "fore_seq"></a>
+    <strong>fore_seq (r[, g[, b]])</strong>
     </dt>
     <dd>
 

@@ -83,7 +83,6 @@
   <li><a href="../examples/readline.lua.html">readline.lua</a></li>
   <li><a href="../examples/sequence.lua.html">sequence.lua</a></li>
   <li><a href="../examples/testscreen.lua.html">testscreen.lua</a></li>
-  <li><a href="../examples/unicode_width.lua.html">unicode_width.lua</a></li>
 </ul>
 
 </div>
@@ -102,7 +101,7 @@
 	<td class="summary">Re-applies the current attributes/colors (at the top of the stack), and writes it to the terminal.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#applys">applys ()</a></td>
+	<td class="name" nowrap><a href="#apply_seq">apply_seq ()</a></td>
 	<td class="summary">Re-applies the current attributes/colors (at the top of the stack),
  returns the sequence without writing to the terminal.</td>
 	</tr>
@@ -111,7 +110,7 @@
 	<td class="summary">Pops n attributes/colors off the stack, and writes the last one to the terminal.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#pops">pops ([n=1])</a></td>
+	<td class="name" nowrap><a href="#pop_seq">pop_seq ([n=1])</a></td>
 	<td class="summary">Pops n attributes/colors off the stack (and returns the last one), without writing it to the terminal.</td>
 	</tr>
 	<tr>
@@ -120,7 +119,7 @@
  attributes to the terminal.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#pushs">pushs (attr)</a></td>
+	<td class="name" nowrap><a href="#push_seq">push_seq (attr)</a></td>
 	<td class="summary">Pushes the given attributes/colors onto the stack, and returns an ansi sequence to set the new
  attributes without writing it to the terminal.</td>
 	</tr>
@@ -153,8 +152,8 @@
 
 </dd>
     <dt>
-    <a name = "applys"></a>
-    <strong>applys ()</strong>
+    <a name = "apply_seq"></a>
+    <strong>apply_seq ()</strong>
     </dt>
     <dd>
     Re-applies the current attributes/colors (at the top of the stack),
@@ -201,8 +200,8 @@
 
 </dd>
     <dt>
-    <a name = "pops"></a>
-    <strong>pops ([n=1])</strong>
+    <a name = "pop_seq"></a>
+    <strong>pop_seq ([n=1])</strong>
     </dt>
     <dd>
     Pops n attributes/colors off the stack (and returns the last one), without writing it to the terminal.
@@ -242,7 +241,7 @@
     <ul>
         <li><span class="parameter">attr</span>
             <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
-         the attributes to set, see <a href="../modules/terminal.text.html#attrs">text.attrs</a> for details.
+         the attributes to set, see <code>text.attrs</code> for details.
         </li>
     </ul>
 
@@ -257,8 +256,8 @@
 
 </dd>
     <dt>
-    <a name = "pushs"></a>
-    <strong>pushs (attr)</strong>
+    <a name = "push_seq"></a>
+    <strong>push_seq (attr)</strong>
     </dt>
     <dd>
     Pushes the given attributes/colors onto the stack, and returns an ansi sequence to set the new
@@ -270,7 +269,7 @@
     <ul>
         <li><span class="parameter">attr</span>
             <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
-         the attributes to set, see <a href="../modules/terminal.text.html#attrs">text.attrs</a> for details.
+         the attributes to set, see <code>text.attrs</code> for details.
         </li>
     </ul>
 

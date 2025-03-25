@@ -85,7 +85,6 @@
   <li><a href="../examples/readline.lua.html">readline.lua</a></li>
   <li><a href="../examples/sequence.lua.html">sequence.lua</a></li>
   <li><a href="../examples/testscreen.lua.html">testscreen.lua</a></li>
-  <li><a href="../examples/unicode_width.lua.html">unicode_width.lua</a></li>
 </ul>
 
 </div>
@@ -118,7 +117,7 @@
 <h2><a href="#Sequences">Sequences</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#boxs">boxs (height, width[, format[, clear_flag=" "[, title=""[, lastcolumn=""]]]])</a></td>
+	<td class="name" nowrap><a href="#box_seq">box_seq (height, width[, format[, clear_flag=" "[, title=""[, lastcolumn=""]]]])</a></td>
 	<td class="summary">Creates a sequence to draw a box, without writing it to the terminal.</td>
 	</tr>
 </table>
@@ -150,7 +149,7 @@
         </li>
         <li><span class="parameter">format</span>
             <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
-         the format for the box, see <a href="../modules/terminal.draw.html#boxs">boxs</a> for details.
+         the format for the box, see <code>boxs</code> for details.
         </li>
         <li><span class="parameter">clear_flag</span>
             <span class="types"><span class="type">bool</span></span>
@@ -247,8 +246,8 @@ fmt.post = <span class="string">" "</span> .. fmt.post</pre>
 
     <dl class="function">
     <dt>
-    <a name = "boxs"></a>
-    <strong>boxs (height, width[, format[, clear_flag=" "[, title=""[, lastcolumn=""]]]])</strong>
+    <a name = "box_seq"></a>
+    <strong>box_seq (height, width[, format[, clear_flag=" "[, title=""[, lastcolumn=""]]]])</strong>
     </dt>
     <dd>
     Creates a sequence to draw a box, without writing it to the terminal.

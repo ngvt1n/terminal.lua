@@ -43,7 +43,6 @@
   <li><a href="../examples/readline.lua.html">readline.lua</a></li>
   <li><strong>sequence.lua</strong></li>
   <li><a href="../examples/testscreen.lua.html">testscreen.lua</a></li>
-  <li><a href="../examples/unicode_width.lua.html">unicode_width.lua</a></li>
 </ul>
 <h2>Modules</h2>
 <ul class="nowrap">
@@ -98,19 +97,19 @@
 
 <span class="comment">-- print a green checkmark, without changing any other attributes
 </span><span class="keyword">local</span> greencheck = <span class="function-name">Sequence</span>(
-  <span class="keyword">function</span>() <span class="keyword">return</span> t.text.stack.<span class="function-name">pushs</span>({ fg = <span class="string">"green"</span> }) <span class="keyword">end</span>, <span class="comment">-- set green FG color AT TIME OF WRITING
+  <span class="keyword">function</span>() <span class="keyword">return</span> t.text.stack.<span class="function-name">push_seq</span>({ fg = <span class="string">"green"</span> }) <span class="keyword">end</span>, <span class="comment">-- set green FG color AT TIME OF WRITING
 </span>  <span class="string">"✔"</span>, <span class="comment">-- write a check mark
-</span>  t.text.stack.pops <span class="comment">-- passing in function is enough, since no parameters needed
+</span>  t.text.stack.pop_seq <span class="comment">-- passing in function is enough, since no parameters needed
 </span>)
 
 
 <span class="comment">-- print a green checkmark at the top of the screen.
 </span><span class="comment">-- doesn't use a stack for cursor pos, but terminal memory
 </span><span class="keyword">local</span> top = <span class="function-name">Sequence</span>(
-  t.cursor.position.backups, <span class="comment">-- save cursor position, no params, so passing function is ok
-</span>  t.cursor.position.<span class="function-name">sets</span>(<span class="number">1</span>,<span class="number">1</span>), <span class="comment">-- move to row 1, column 1
+  t.cursor.position.backup_seq, <span class="comment">-- save cursor position, no params, so passing function is ok
+</span>  t.cursor.position.<span class="function-name">set_seq</span>(<span class="number">1</span>,<span class="number">1</span>), <span class="comment">-- move to row 1, column 1
 </span>  greencheck, <span class="comment">-- print the green checkmark, injecting another sequence
-</span>  t.cursor.position.restores <span class="comment">-- restore cursor position, no params, so passing function is ok
+</span>  t.cursor.position.restore_seq <span class="comment">-- restore cursor position, no params, so passing function is ok
 </span>)
 
 
@@ -118,9 +117,9 @@
 </span><span class="comment">-- this is safer, if the 'greencheck' sub-sequence would also use the
 </span><span class="comment">-- terminal memory for the cursor position (overwriting ours).
 </span><span class="keyword">local</span> top2 = <span class="function-name">Sequence</span>(
-  <span class="keyword">function</span>() <span class="keyword">return</span> t.cursor.position.stack.<span class="function-name">pushs</span>(<span class="number">2</span>,<span class="number">2</span>) <span class="keyword">end</span>,
+  <span class="keyword">function</span>() <span class="keyword">return</span> t.cursor.position.stack.<span class="function-name">push_seq</span>(<span class="number">2</span>,<span class="number">2</span>) <span class="keyword">end</span>,
   greencheck, <span class="comment">-- print the green checkmark
-</span>  t.cursor.position.stack.pops
+</span>  t.cursor.position.stack.pop_seq
 )
 
 

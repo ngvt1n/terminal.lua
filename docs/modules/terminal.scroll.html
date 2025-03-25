@@ -84,7 +84,6 @@
   <li><a href="../examples/readline.lua.html">readline.lua</a></li>
   <li><a href="../examples/sequence.lua.html">sequence.lua</a></li>
   <li><a href="../examples/testscreen.lua.html">testscreen.lua</a></li>
-  <li><a href="../examples/unicode_width.lua.html">unicode_width.lua</a></li>
 </ul>
 
 </div>
@@ -122,23 +121,23 @@
 <h2><a href="#Sequences">Sequences</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#downs">downs ([n=1])</a></td>
+	<td class="name" nowrap><a href="#down_seq">down_seq ([n=1])</a></td>
 	<td class="summary">Creates an ANSI sequence to scroll down by a specified number of lines.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#resets">resets ()</a></td>
+	<td class="name" nowrap><a href="#reset_seq">reset_seq ()</a></td>
 	<td class="summary">Function to return the default scroll reset sequence</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#sets">sets (start_row, end_row)</a></td>
+	<td class="name" nowrap><a href="#set_seq">set_seq (start_row, end_row)</a></td>
 	<td class="summary">Creates an ANSI sequence to set the scroll region without writing to the terminal.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#ups">ups ([n=1])</a></td>
+	<td class="name" nowrap><a href="#up_seq">up_seq ([n=1])</a></td>
 	<td class="summary">Creates an ANSI sequence to scroll up by a specified number of lines.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#verticals">verticals (n)</a></td>
+	<td class="name" nowrap><a href="#vertical_seq">vertical_seq (n)</a></td>
 	<td class="summary">Creates an ANSI sequence to scroll vertically by a specified number of lines.</td>
 	</tr>
 </table>
@@ -291,8 +290,8 @@
 
     <dl class="function">
     <dt>
-    <a name = "downs"></a>
-    <strong>downs ([n=1])</strong>
+    <a name = "down_seq"></a>
+    <strong>down_seq ([n=1])</strong>
     </dt>
     <dd>
     Creates an ANSI sequence to scroll down by a specified number of lines.
@@ -319,8 +318,8 @@
 
 </dd>
     <dt>
-    <a name = "resets"></a>
-    <strong>resets ()</strong>
+    <a name = "reset_seq"></a>
+    <strong>reset_seq ()</strong>
     </dt>
     <dd>
     Function to return the default scroll reset sequence
@@ -339,8 +338,8 @@
 
 </dd>
     <dt>
-    <a name = "sets"></a>
-    <strong>sets (start_row, end_row)</strong>
+    <a name = "set_seq"></a>
+    <strong>set_seq (start_row, end_row)</strong>
     </dt>
     <dd>
     Creates an ANSI sequence to set the scroll region without writing to the terminal.
@@ -374,8 +373,8 @@
 
 </dd>
     <dt>
-    <a name = "ups"></a>
-    <strong>ups ([n=1])</strong>
+    <a name = "up_seq"></a>
+    <strong>up_seq ([n=1])</strong>
     </dt>
     <dd>
     Creates an ANSI sequence to scroll up by a specified number of lines.
@@ -402,8 +401,8 @@
 
 </dd>
     <dt>
-    <a name = "verticals"></a>
-    <strong>verticals (n)</strong>
+    <a name = "vertical_seq"></a>
+    <strong>vertical_seq (n)</strong>
     </dt>
     <dd>
     Creates an ANSI sequence to scroll vertically by a specified number of lines.

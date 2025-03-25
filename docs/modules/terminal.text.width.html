@@ -84,7 +84,6 @@
   <li><a href="../examples/readline.lua.html">readline.lua</a></li>
   <li><a href="../examples/sequence.lua.html">sequence.lua</a></li>
   <li><a href="../examples/testscreen.lua.html">testscreen.lua</a></li>
-  <li><a href="../examples/unicode_width.lua.html">unicode_width.lua</a></li>
 </ul>
 
 </div>
@@ -103,7 +102,7 @@
 
 <p> This module implements a cache of character widths as they have been measured.</p>
 
-<p> To populate the cache with tested widths use <a href="../modules/terminal.text.width.html#width_test">width_test</a> and <a href="../modules/terminal.text.width.html#width_test_write">width_test_write</a>.</p>
+<p> To populate the cache with tested widths use <a href="../modules/terminal.text.width.html#test">test</a> and <a href="../modules/terminal.text.width.html#test_write">test_write</a>.</p>
 
 <p> To check width, using the cached widths, use <a href="../modules/terminal.text.width.html#utf8cwidth">utf8cwidth</a> and <a href="../modules/terminal.text.width.html#utf8swidth">utf8swidth</a>.</p>
 
@@ -122,11 +121,11 @@
 <h2><a href="#Testing">Testing</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#width_test">width_test (str)</a></td>
+	<td class="name" nowrap><a href="#test">test (str)</a></td>
 	<td class="summary">Returns the width of the string, by test writing.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#width_test_write">width_test_write (str)</a></td>
+	<td class="name" nowrap><a href="#test_write">test_write (str)</a></td>
 	<td class="summary">Returns the width of the string, and writes it to the terminal.</td>
 	</tr>
 </table>
@@ -201,8 +200,8 @@
 
     <dl class="function">
     <dt>
-    <a name = "width_test"></a>
-    <strong>width_test (str)</strong>
+    <a name = "test"></a>
+    <strong>test (str)</strong>
     </dt>
     <dd>
 
@@ -251,8 +250,8 @@
 
 </dd>
     <dt>
-    <a name = "width_test_write"></a>
-    <strong>width_test_write (str)</strong>
+    <a name = "test_write"></a>
+    <strong>test_write (str)</strong>
     </dt>
     <dd>
     Returns the width of the string, and writes it to the terminal.

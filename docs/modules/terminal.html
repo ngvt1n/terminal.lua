@@ -83,7 +83,6 @@
   <li><a href="../examples/readline.lua.html">readline.lua</a></li>
   <li><a href="../examples/sequence.lua.html">sequence.lua</a></li>
   <li><a href="../examples/testscreen.lua.html">testscreen.lua</a></li>
-  <li><a href="../examples/unicode_width.lua.html">unicode_width.lua</a></li>
 </ul>
 
 </div>
@@ -115,7 +114,7 @@
 	<td class="summary">Write a sequence to the terminal to make it beep.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#beeps">beeps ()</a></td>
+	<td class="name" nowrap><a href="#beep_seq">beep_seq ()</a></td>
 	<td class="summary">Returns a string sequence to make the terminal beep.</td>
 	</tr>
 	<tr>
@@ -125,6 +124,10 @@
 	<tr>
 	<td class="name" nowrap><a href="#initwrap">initwrap ([opts], main, ...)</a></td>
 	<td class="summary">Wrap a function in <a href="../modules/terminal.html#initialize">initialize</a> and <a href="../modules/terminal.html#shutdown">shutdown</a> calls.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#preload_widths">preload_widths (str)</a></td>
+	<td class="summary">Preload known characters into the width-cache.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#ready">ready ()</a></td>
@@ -163,8 +166,8 @@
 
 </dd>
     <dt>
-    <a name = "beeps"></a>
-    <strong>beeps ()</strong>
+    <a name = "beep_seq"></a>
+    <strong>beep_seq ()</strong>
     </dt>
     <dd>
     Returns a string sequence to make the terminal beep.
@@ -286,6 +289,34 @@
 }
 <span class="global">assert</span>(t.<span class="function-name">initwrap</span>(opts, main, <span class="string">"one"</span>, <span class="string">"two"</span>)) <span class="comment">-- assert to rethrow any error after termimal restore</span></pre>
     </ul>
+
+</dd>
+    <dt>
+    <a name = "preload_widths"></a>
+    <strong>preload_widths (str)</strong>
+    </dt>
+    <dd>
+    Preload known characters into the width-cache.
+ Source is the <code>draw.box</code> formats, and the <code>progress</code> spinner sprites.
+ Uses <code>text.width.test</code> to test the widths of the characters.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">str</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         additional character string to preload
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
 
 </dd>
     <dt>
