@@ -21,6 +21,10 @@ local key_names = {
   ["\6"] = "ctrl-f",
   ["\2"] = "ctrl-b",
 }
+local function readKey()
+  local key = t.input.readansi(1)
+  return key, key_names[key] or key
+end
 
 -- Colors
 local colors = {
@@ -29,6 +33,12 @@ local colors = {
 
 -- Terminal UI class
 local TerminalUI = {}
+-- Draw components using the stack style
+local function withStyle(style, callback)
+  t.text.stack.push(style)
+  callback()
+  t.text.stack.pop()
+end
 
 -- Constructor
 function TerminalUI:new(options)
@@ -67,21 +77,12 @@ function TerminalUI:getCurrentColorInfo()
     colors[self.currentBgColorIndex])
 end
 
-function TerminalUI:readKey()
-  local key = t.input.readansi(1)
-  return key, key_names[key] or key
-end
 
-function TerminalUI:withStyle(style, callback)
-  t.text.stack.push(style)
-  callback()
-  t.text.stack.pop()
-end
 
 function TerminalUI:drawBar(row, style, contentFn)
   local _, cols = sys.termsize()
 
-  self:withStyle(style, function()
+  withStyle(self.style, function()
     t.cursor.position.set(row, 1)
     t.output.write(string.rep(" ", cols))
 
