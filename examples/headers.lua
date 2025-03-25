@@ -115,7 +115,7 @@ function TextArea:cycleColor(isBackground)
     self.style.fg = colors[self.currentFgColorIndex]
   end
 
-  t.text.attrs(self.style)
+  self:initializeContent()
   self.parent_app:refreshDisplay()
 end
 
@@ -132,7 +132,8 @@ end
 function TextArea:initializeContent()
   local rows, cols = sys.termsize()
 
-  t.text.attrs(self.style)
+  t.text.stack.pop()
+  t.text.stack.push(self.style)
 
   for i = 2, rows - 1 do
     t.cursor.position.set(i, 1)
