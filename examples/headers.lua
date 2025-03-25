@@ -21,9 +21,17 @@ local key_names = {
   ["\6"] = "ctrl-f",
   ["\2"] = "ctrl-b",
 }
+-- Utility function to read a key from terminal input
 local function readKey()
-  local key = t.input.readansi(1)
-  return key, key_names[key] or key
+  local key = t.input.readansi(1) -- Read a single key
+  return key, key_names[key] or key -- Return raw key and mapped name
+end
+
+-- Utility function to draw components using the stack style
+local function withStyle(style, callback)
+  t.text.stack.push(style)
+  callback()
+  t.text.stack.pop()
 end
 
 -- Colors
@@ -31,19 +39,12 @@ local colors = {
   "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"
 }
 
--- Draw components using the stack style
-local function withStyle(style, callback)
-  t.text.stack.push(style)
-  callback()
-  t.text.stack.pop()
-end
-
 -- TUI classes
 local TerminalUIApp = {}
 local Bar = {}
 local TextArea = {}
 
--- Constructor
+-- Constructor: TerminalUIApp: Full-screen TUI App
 function TerminalUIApp:new(options)
   options = options or {}
   local instance = {
@@ -53,14 +54,54 @@ function TerminalUIApp:new(options)
     content = options.content or TextArea:new(),
     linesWritten = 0,
   }
-  setmetatable(instance, {__index = self})
+  setmetatable(instance, { __index = self })
   -- circular reference between components and parent tui app
   instance.content.parent_app = instance.content.parent_app or instance
   instance.header.parent_app = instance.header.parent_app or instance
   instance.footer.parent_app = instance.footer.parent_app or instance
   return instance
 end
--- cycle color
+
+function TerminalUIApp:run()
+  t.initialize {
+    displaybackup = true,
+    filehandle = io.stdout,
+  }
+  t.clear.screen()
+
+  self.content:initializeContent()
+  self.content:handleInput()
+
+  t.shutdown()
+  print("Thank you for using MyTerminal! You wrote " .. self.linesWritten .. " lines.")
+end
+
+function TerminalUIApp:refreshDisplay()
+  local savedY, savedX = self.content.cursorY, self.content.cursorX
+  local rows, _ = sys.termsize()
+
+  self.header:draw(1)
+  self.footer:draw(rows)
+
+  self.content:updateCursor(savedY, savedX)
+end
+
+-- Constructor: TextArea: main content area
+function TextArea:new(options)
+  options = options or {}
+  local instance = {
+    parent_app = options.parent_app,
+    cursorY = 2,
+    cursorX = 2,
+    indexFg = 3,
+    indexBg = 1,
+    style = options.style or { fg = "blue", bg = "blue", brightness = "normal" },
+  }
+  setmetatable(instance, { __index = self })
+  return instance
+end
+
+-- cycle colors
 function TextArea:cycleColor(isBackground)
   if isBackground then
     self.currentBgColorIndex = (self.currentBgColorIndex % #colors) + 1
@@ -75,98 +116,13 @@ function TextArea:cycleColor(isBackground)
 end
 
 function TextArea:getCurrentColorInfo()
-  return string.format("FG: %s, BG: %s",
-    colors[self.currentFgColorIndex],
-    colors[self.currentBgColorIndex])
-end
-
-
-function Bar:new(options)
-  options = options or {}
-  local instance = {
-    style = options.style or { fg = "white", bg = "blue", brightness = "bright" },
-    content_fn = options.content_fn,
-  }
-  setmetatable(instance, { __index = self })
-  return instance
-end
-
-function Bar:draw(row)
-  local _, cols = sys.termsize()
-
-  withStyle(self.style, function()
-    t.cursor.position.set(row, 1)
-    t.output.write(string.rep(" ", cols))
-
-    if self.content_fn then
-      self:content_fn(row, cols)
-    end
-  end)
+  return string.format("FG: %s, BG: %s", colors[self.currentFgColorIndex], colors[self.currentBgColorIndex])
 end
 
 function TextArea:updateCursor(y, x)
   self.cursorY = y
   self.cursorX = x
   t.cursor.position.set(y, x)
-end
-
-local myHeader = Bar:new {
-  style = { fg = "white", bg = "blue", brightness = "bright" },
-  content_fn = function(self, _, cols)
-    local currentTime = os.date("%H:%M:%S")
-    local cursorText = string.format("Pos: %d,%d", self.parent_app.content.cursorY, self.parent_app.content.cursorX)
-    t.cursor.position.set(1, 2)
-    t.output.write(self.parent_app.appName)
-
-    local clockPos = math.floor(cols / 4)
-    t.cursor.position.set(1, clockPos)
-    t.output.write(currentTime)
-
-    local cursorPos = math.floor(cols / 2) + 5
-    t.cursor.position.set(1, cursorPos)
-    t.output.write(cursorText)
-
-    local colorText = "Color: " .. self.parent_app.content:getCurrentColorInfo()
-    t.cursor.position.set(1, cols - #colorText - 1)
-    t.output.write(colorText)
-  end,
-}
-local myFooter = Bar:new {
-  style = { fg = "white", bg = "blue", brightness = "bright" },
-  content_fn = function(self, _, cols)
-    local rows, _ = sys.termsize()
-    local lineText = "Lines: " .. self.parent_app.linesWritten
-    local helpText = "Ctrl+F: Change FG | Ctrl+B: Change BG | ESC: Exit"
-
-    t.cursor.position.set(rows, 2)
-    t.output.write(lineText)
-
-    t.cursor.position.set(rows, cols - #helpText - 1)
-    t.output.write(helpText)
-  end,
-}
-
-function TerminalUIApp:refreshDisplay()
-  local savedY, savedX = self.content.cursorY, self.content.cursorX
-  local rows, _ = sys.termsize()
-
-  self.header:draw(1)
-  self.footer:draw(rows)
-
-  self.content:updateCursor(savedY, savedX)
-end
-function TextArea:new(options)
-  options = options or {}
-  local instance = {
-    parent_app = options.parent_app,
-    cursorY = 2,
-    cursorX = 2,
-    indexFg = 3,
-    indexBg = 1,
-    style = options.style or { fg = "blue", bg = "blue", brightness = "normal" },
-  }
-  setmetatable(instance, { __index = self })
-  return instance
 end
 
 function TextArea:initializeContent()
@@ -239,19 +195,66 @@ function TextArea:handleInput()
   end
 end
 
-function TerminalUIApp:run()
-  t.initialize{
-    displaybackup = true,
-    filehandle = io.stdout,
+-- Constructor: Bar: horizontal bar in the screen
+function Bar:new(options)
+  options = options or {}
+  local instance = {
+    style = options.style or { fg = "white", bg = "blue", brightness = "bright" },
+    content_fn = options.content_fn,
   }
-  t.clear.screen()
-
-  self.content:initializeContent()
-  self.content:handleInput()
-
-  t.shutdown()
-  print("Thank you for using MyTerminal! You wrote " .. self.linesWritten .. " lines.")
+  setmetatable(instance, { __index = self })
+  return instance
 end
+
+function Bar:draw(row)
+  local _, cols = sys.termsize()
+
+  withStyle(self.style, function()
+    t.cursor.position.set(row, 1)
+    t.output.write(string.rep(" ", cols))
+
+    if self.content_fn then
+      self:content_fn(row, cols)
+    end
+  end)
+end
+
+-- Initiate two bars of Bar for header and footer
+local myHeader = Bar:new {
+  style = { fg = "white", bg = "blue", brightness = "bright" },
+  content_fn = function(self, _, cols)
+    local currentTime = os.date("%H:%M:%S")
+    local cursorText = string.format("Pos: %d,%d", self.parent_app.content.cursorY, self.parent_app.content.cursorX)
+    t.cursor.position.set(1, 2)
+    t.output.write(self.parent_app.appName)
+
+    local clockPos = math.floor(cols / 4)
+    t.cursor.position.set(1, clockPos)
+    t.output.write(currentTime)
+
+    local cursorPos = math.floor(cols / 2) + 5
+    t.cursor.position.set(1, cursorPos)
+    t.output.write(cursorText)
+
+    local colorText = "Color: " .. self.parent_app.content:getCurrentColorInfo()
+    t.cursor.position.set(1, cols - #colorText - 1)
+    t.output.write(colorText)
+  end,
+}
+local myFooter = Bar:new {
+  style = { fg = "white", bg = "blue", brightness = "bright" },
+  content_fn = function(self, _, cols)
+    local rows, _ = sys.termsize()
+    local lineText = "Lines: " .. self.parent_app.linesWritten
+    local helpText = "Ctrl+F: Change FG | Ctrl+B: Change BG | ESC: Exit"
+
+    t.cursor.position.set(rows, 2)
+    t.output.write(lineText)
+
+    t.cursor.position.set(rows, cols - #helpText - 1)
+    t.output.write(helpText)
+  end,
+}
 
 local myTerminal = TerminalUIApp:new {
   appName = "The best terminal ever",
