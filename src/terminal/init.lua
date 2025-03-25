@@ -56,7 +56,7 @@ M._sleep = sys.sleep   -- a (optionally) non-blocking sleep function
 
 --- Returns a string sequence to make the terminal beep.
 -- @treturn string ansi sequence to write to the terminal
-function M.beeps()
+function M.beep_seq()
   return "\a"
 end
 
@@ -65,7 +65,7 @@ end
 --- Write a sequence to the terminal to make it beep.
 -- @return true
 function M.beep()
-  output.write(M.beeps())
+  output.write(M.beep_seq())
   return true
 end
 
@@ -153,11 +153,11 @@ do
     -- restore all stacks
     local r,c = cursor.position.get() -- Mac: scroll-region reset changes cursor pos to 1,1, so store it
     output.write(
-      cursor.shape.stack.pops(math.huge),
-      cursor.visible.stack.pops(math.huge),
-      text.stack.pops(math.huge),
-      scroll.stack.pops(math.huge),
-      cursor.position.sets(r,c) -- restore cursor pos
+      cursor.shape.stack.pop_seq(math.huge),
+      cursor.visible.stack.pop_seq(math.huge),
+      text.stack.pop_seq(math.huge),
+      scroll.stack.pop_seq(math.huge),
+      cursor.position.set_seq(r,c) -- restore cursor pos
     )
     output.flush()
 

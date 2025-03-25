@@ -8,19 +8,19 @@ local Sequence = require("terminal.sequence")
 
 -- print a green checkmark, without changing any other attributes
 local greencheck = Sequence(
-  function() return t.text.stack.pushs({ fg = "green" }) end, -- set green FG color AT TIME OF WRITING
+  function() return t.text.stack.push_seq({ fg = "green" }) end, -- set green FG color AT TIME OF WRITING
   "✔", -- write a check mark
-  t.text.stack.pops -- passing in function is enough, since no parameters needed
+  t.text.stack.pop_seq -- passing in function is enough, since no parameters needed
 )
 
 
 -- print a green checkmark at the top of the screen.
 -- doesn't use a stack for cursor pos, but terminal memory
 local top = Sequence(
-  t.cursor.position.backups, -- save cursor position, no params, so passing function is ok
-  t.cursor.position.sets(1,1), -- move to row 1, column 1
+  t.cursor.position.backup_seq, -- save cursor position, no params, so passing function is ok
+  t.cursor.position.set_seq(1,1), -- move to row 1, column 1
   greencheck, -- print the green checkmark, injecting another sequence
-  t.cursor.position.restores -- restore cursor position, no params, so passing function is ok
+  t.cursor.position.restore_seq -- restore cursor position, no params, so passing function is ok
 )
 
 
@@ -28,9 +28,9 @@ local top = Sequence(
 -- this is safer, if the 'greencheck' sub-sequence would also use the
 -- terminal memory for the cursor position (overwriting ours).
 local top2 = Sequence(
-  function() return t.cursor.position.stack.pushs(2,2) end,
+  function() return t.cursor.position.stack.push_seq(2,2) end,
   greencheck, -- print the green checkmark
-  t.cursor.position.stack.pops
+  t.cursor.position.stack.pop_seq
 )
 
 
