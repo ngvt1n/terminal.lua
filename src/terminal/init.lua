@@ -195,21 +195,23 @@ end
 --- Wrap a function in `initialize` and `shutdown` calls.
 -- When an error occurs, and the application exits, the terminal might not be properly shut down.
 -- This function wraps a function in calls to `initialize` and `shutdown`, ensuring the terminal is properly shut down.
+-- If an error is caught, it first shutsdown the terminal and then rethrows the error.
 -- @tparam[opt] table opts options table, to pass to `initialize`.
 -- @tparam function main the function to wrap
 -- @param ... any parameters to pass to the main function
--- @treturn any the return values of the wrapped function, or nil+err in case of an error
+-- @return the return values of the wrapped function
 -- @usage local function main(param1, param2)
---   -- your main app functionality here
 --
---   return true -- return truthy to pass assertion below
+--   -- your main app functionality here
+--   error("oops...")
+--
 -- end
 --
 -- local opts = {
 --   filehandle = io.stderr,
 --   displaybackup = true,
 -- }
--- assert(t.initwrap(opts, main, "one", "two")) -- assert to rethrow any error after termimal restore
+-- t.initwrap(opts, main, "one", "two") -- rethrows any error after termimal restore
 function M.initwrap(opts, main, ...)
   assert(type(main) == "function", "expected main to be a function, got " .. type(main))
   M.initialize(opts)
@@ -222,7 +224,7 @@ function M.initwrap(opts, main, ...)
   M.shutdown()
 
   if not ok then
-    error(err, 2)
+    return error(err, 2)
   end
   return unpack(results)
 end
