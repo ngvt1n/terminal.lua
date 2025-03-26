@@ -38,7 +38,8 @@ local function main()
 
   -- add the ticker one last
   spinners[#spinners+1] = p.spinner {
-    sprites = p.ticker("please wait...", 30, "Done!"),
+    -- uses utf8 character
+    sprites = p.ticker("🕓-Please wait-🎹...", 30, "Done!"),
     col = 1,
     row = r - 1,
     textattr = {fg = "black", bg = "red", brightness = "normal"},
