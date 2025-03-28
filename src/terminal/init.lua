@@ -83,9 +83,9 @@ end
 
 
 --- Preload known characters into the width-cache.
--- Source is the `draw.box` formats, and the `progress` spinner sprites.
+-- Characters loaded will be the `draw.box` formats, and the `progress` spinner sprites.
 -- Uses `text.width.test` to test the widths of the characters.
--- @tparam string str additional character string to preload
+-- @tparam[opt] string str additional character string to preload
 -- @return true
 function M.preload_widths(str)
   text.width.test((str or "") .. M.progress._spinner_fmt_chars() .. M.draw.box_fmt_chars())
