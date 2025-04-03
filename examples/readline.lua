@@ -38,7 +38,7 @@ local function bell()
     ou.flush()
 end
 
-local utf8_value_mt = {}
+local utf8_value_mt
 local utf8parse = {}
 do
     utf8_value_mt = {
@@ -77,8 +77,7 @@ do
 
     function utf8parse:add(c) -- add to string at index
         if c == nil then return end
-        local node = {}
-        node = { value = c, next = self.icursor, prev = self.icursor.prev }
+        local node = { value = c, next = self.icursor, prev = self.icursor.prev }
         self.icursor.prev.next = node
         self.icursor.prev = node
         self.ilen = self.ilen + 1
@@ -204,7 +203,7 @@ end
 -- @tparam string keytype The type of the key (e.g., "ansi", "control").
 function readline:readkey_co()
     while true do
-        local key, keytype = t.input.readansi(1, self.fsleep)
+        local key, keytype = t.input.readansi(0.1, self.fsleep) -- blocking sleep
         if key then
             local status = self:handle_key(key, keytype)
             if status == "exit_key" then   -- exit key pressed?
