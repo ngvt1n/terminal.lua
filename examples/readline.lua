@@ -196,6 +196,12 @@ function readline:handle_key(key, keytype)
     return "ok"
 end
 
+--- Processes key input using an event-driven approach.
+-- This function listens for key events and processes them.
+-- If an exit key is pressed, it yields the input value and the exit key.
+-- @event key Triggered when a key is pressed.
+-- @tparam string key The key that was pressed.
+-- @tparam string keytype The type of the key (e.g., "ansi", "control").
 function readline:readkey_co()
     while true do
         local key, keytype = t.input.readansi(1, self.fsleep)
@@ -210,6 +216,12 @@ function readline:readkey_co()
     end
 end
 
+--- Starts the readline input loop.
+-- This function initializes the input loop for the readline instance.
+-- It uses a coroutine to process key input until an exit key is pressed.
+-- @tparam boolean redraw Whether to redraw the prompt initially.
+-- @treturn string The final input value entered by the user.
+-- @treturn string The exit key that terminated the input loop.
 function readline:run(redraw)
     self:draw(redraw)
 
