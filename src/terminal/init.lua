@@ -122,11 +122,11 @@ do
   -- @tparam[opt=io.stderr] filehandle opts.filehandle the stream to use for output
   -- @tparam[opt=sys.sleep] function opts.bsleep the blocking sleep function to use.
   -- This should never be set to a yielding sleep function! This function
-  -- will be used by `cursor.position.get` when reading the cursor position.
-  -- @tparam[opt=sys.sleep] function opts.sleep the default sleep function to use for `readansi`.
+  -- will be used by `terminal.cursor.position.get` when reading the cursor position.
+  -- @tparam[opt=sys.sleep] function opts.sleep the default sleep function to use for `terminal.input.readansi`.
   -- In an async application (coroutines), this should be a yielding sleep function, eg. `copas.pause`.
   -- @tparam[opt=true] boolean opts.autotermrestore if `false`, the terminal settings will not be restored.
-  -- See `luasystem.autotermrestore`.
+  -- See [`luasystem.autotermrestore`](https://lunarmodules.github.io/luasystem/modules/system.html#autotermrestore).
   -- @tparam[opt=false] boolean opts.disable_sigint if `true`, the terminal will not send a SIGINT signal
   -- on Ctrl-C. Disables Ctrl-C, Ctrl-Z, and Ctrl-\, which allows the application to handle them.
   -- @return true
