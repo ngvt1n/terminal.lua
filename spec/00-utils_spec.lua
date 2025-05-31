@@ -103,4 +103,107 @@ describe("Utils", function()
 
   end)
 
+
+
+  describe("class", function()
+
+    it("creates a class", function()
+      local MyClass = utils.class()
+      assert.is_not_nil(MyClass)
+      assert.is_not_nil(MyClass.__index)
+      assert.is_not_nil(MyClass.__index.__index)
+    end)
+
+
+    it("instantiation calls the 'init' method", function()
+      local MyClass = utils.class()
+      function MyClass:init()
+        self.value = 42
+      end
+      local instance = MyClass()
+      assert.is_not_nil(instance)
+      assert.are.equal(instance.super, MyClass)
+      assert.are.equal(42, instance.value)
+    end)
+
+
+    it("subclassing works", function()
+      local Cat = utils.class()
+      function Cat:init()
+        self.value = 42
+      end
+
+      local Lion = utils.class(Cat)
+      function Lion:init()
+        Cat.init(self)
+        self.value = self.value * 2
+      end
+
+      local instance = Lion()
+      assert.is_not_nil(instance)
+      assert.are.equal(Lion.super, Cat)
+      assert.are.equal(84, instance.value)
+    end)
+
+
+    it("instantiating calls initializer with parameters", function()
+      local Cat = utils.class()
+      function Cat:init(value)
+        self.value = value or 42
+      end
+
+      local Lion = utils.class(Cat)
+      function Lion:init(...)
+        Cat.init(self, ...)  -- call ancenstor initializer
+        self.value = self.value * 2
+      end
+
+      local instance = Lion(10)
+      assert.is_not_nil(instance)
+      assert.are.equal(instance.super, Lion)
+      assert.are.equal(20, instance.value)
+    end)
+
+
+    it("calling 'init' on an instance throws an error", function()
+      local Cat = utils.class()
+      function Cat:init(value)
+        self.value = value or 42
+      end
+
+      local Lion = utils.class(Cat)
+      function Lion:init(...)
+        Cat.init(self, ...)  -- call ancenstor initializer
+        self.value = self.value * 2
+      end
+
+      local instance = Lion(10)
+      local f = function()
+        instance:init(20)
+      end
+      assert.has_error(f, "the 'init' method should never be called directly")
+    end)
+
+
+    it("instantiating an instance of a class throws an error", function()
+      local MyClass = utils.class()
+      local myInstance = MyClass()
+      local f = function()
+        myInstance()
+      end
+      assert.has_error(f, "Constructor can only be called on a Class")
+    end)
+
+
+    it("subclassing an instance throws an error", function()
+      local MyClass = utils.class()
+      local myInstance = MyClass()
+      local f = function()
+        utils.class(myInstance)
+      end
+      assert.has_error(f, "Baseclass is not a Class, can only subclass a Class")
+    end)
+
+  end)
+
 end)

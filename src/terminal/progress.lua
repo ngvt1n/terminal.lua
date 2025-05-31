@@ -4,6 +4,7 @@ local M = {}
 package.loaded["terminal.progress"] = M -- Register the module early to avoid circular dependencies
 
 local t = require("terminal")
+local tw = require("terminal.text.width")
 local Sequence = require("terminal.sequence")
 local utils = require("terminal.utils")
 
@@ -128,7 +129,6 @@ function M.spinner(opts)
   local step = 0
   local next_step = gettime()
 
-
   return function(done)
     if gettime() >= next_step or done then
       if done then
@@ -160,11 +160,25 @@ function M.ticker(text, width, text_done)
   text_done = text_done or ""
 
   local base = (" "):rep(width) .. text .. (" "):rep(width)
-  local result = { [0] = (text_done .. (" "):rep(width)):sub(1,width) }
-  for i = 1, width + #text do
-    result[i] = base:sub(i, i + width - 1)
+  local result = { [0] = text_done .. (" "):rep(width) }
+  local lengths = { [0] = width + utf8.len(text) }
+
+  -- Simultaneously records max of lengths, later on we use this max_len as a standard for other strings
+  local max_len = 0
+  for i = 1, lengths[0] do
+    result[i] = tw.utf8sub(base, i, i + width - 1)
+    lengths[i] = tw.utf8swidth(result[i])
+    max_len = math.max(max_len, lengths[i])
+  end
+  result[0] = tw.utf8sub(result[0], 1, max_len)
+
+  for i = 1, math.floor(lengths[0] / 2) do
+    result[i] = (" "):rep(max_len - lengths[i]) .. result[i]
   end
 
+  for i = math.floor(lengths[0] / 2) + 1, (width + utf8.len(text)) do
+    result[i] = result[i] .. (" "):rep(max_len - lengths[i])
+  end
   return result
 end
 

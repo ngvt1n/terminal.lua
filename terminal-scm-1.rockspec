@@ -25,7 +25,7 @@ description = {
 
 dependencies = {
   "lua >= 5.1, < 5.5",
-  "luasystem >= 0.5.0",
+  "luasystem >= 0.6.0",
   "utf8",
 }
 
@@ -36,10 +36,11 @@ build = {
     ["terminal.init"] = "src/terminal/init.lua",
     ["terminal.progress"] = "src/terminal/progress.lua",
     ["terminal.sequence"] = "src/terminal/sequence.lua",
-    ["terminal.input"] = "src/terminal/input.lua",
     ["terminal.output"] = "src/terminal/output.lua",
     ["terminal.clear"] = "src/terminal/clear.lua",
     ["terminal.utils"] = "src/terminal/utils.lua",
+    ["terminal.input.init"] = "src/terminal/input/init.lua",
+    ["terminal.input.keymap"] = "src/terminal/input/keymap.lua",
     ["terminal.scroll.init"] = "src/terminal/scroll/init.lua",
     ["terminal.scroll.stack"] = "src/terminal/scroll/stack.lua",
     ["terminal.cursor.init"] = "src/terminal/cursor/init.lua",
@@ -55,6 +56,7 @@ build = {
     ["terminal.text.color"] = "src/terminal/text/color.lua",
     ["terminal.text.stack"] = "src/terminal/text/stack.lua",
     ["terminal.text.width"] = "src/terminal/text/width.lua",
+    ["terminal.cli.select"] = "src/terminal/cli/select.lua",
   },
 
   copy_directories = {

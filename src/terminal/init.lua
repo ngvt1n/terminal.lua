@@ -7,7 +7,7 @@
 -- It provides a simple and consistent interface to the terminal, allowing for cursor positioning,
 -- cursor shape and visibility, text formatting, and more.
 --
--- For generic instruction please read the [introduction](topics/01-introduction.md.html).
+-- For generic instruction please read the [introduction](../topics/01-introduction.md.html).
 --
 -- @copyright Copyright (c) 2024-2024 Thijs Schreijer
 -- @author Thijs Schreijer
@@ -54,6 +54,17 @@ M._sleep = sys.sleep   -- a (optionally) non-blocking sleep function
 
 
 
+--- Returns the terminal size in rows and columns.
+-- Just a convenience, maps 1-on-1 to `system.termsize`.
+-- @treturn[1] number number of rows
+-- @treturn[1] number number of columns
+-- @treturn[2] nil on error
+-- @treturn[2] string error message
+-- @function size
+M.size = sys.termsize
+
+
+
 --- Returns a string sequence to make the terminal beep.
 -- @treturn string ansi sequence to write to the terminal
 function M.beep_seq()
@@ -72,10 +83,13 @@ end
 
 
 --- Preload known characters into the width-cache.
--- Source is the `draw.box` formats, and the `progress` spinner sprites.
--- Uses `text.width.test` to test the widths of the characters.
--- @tparam string str additional character string to preload
+-- Typically this should be called right after initialization. It will check default
+-- characters in use by this library, and the optional specified characters in `str`.
+-- Characters loaded will be the `terminal.draw.box_fmt` formats, and the `progress` spinner sprites.
+-- Uses `terminal.text.width.test` to test the widths of the characters.
+-- @tparam[opt] string str additional character string to preload
 -- @return true
+-- @within Initialization
 function M.preload_widths(str)
   text.width.test((str or "") .. M.progress._spinner_fmt_chars() .. M.draw.box_fmt_chars())
   return true
@@ -93,6 +107,7 @@ do
 
   --- Returns whether the terminal has been initialized and is ready for use.
   -- @treturn boolean true if the terminal has been initialized
+  -- @within Initialization
   function M.ready()
     return termbackup ~= nil
   end
@@ -111,11 +126,15 @@ do
   -- @tparam[opt=io.stderr] filehandle opts.filehandle the stream to use for output
   -- @tparam[opt=sys.sleep] function opts.bsleep the blocking sleep function to use.
   -- This should never be set to a yielding sleep function! This function
-  -- will be used by the `terminal.write` and `terminal.print` to prevent buffer-overflows and
-  -- truncation when writing to the terminal. And by `cursor.position.get` when reading the cursor position.
-  -- @tparam[opt=sys.sleep] function opts.sleep the default sleep function to use for `readansi`.
+  -- will be used by `terminal.cursor.position.get` when reading the cursor position.
+  -- @tparam[opt=sys.sleep] function opts.sleep the default sleep function to use for `terminal.input.readansi`.
   -- In an async application (coroutines), this should be a yielding sleep function, eg. `copas.pause`.
+  -- @tparam[opt=true] boolean opts.autotermrestore if `false`, the terminal settings will not be restored.
+  -- See [`luasystem.autotermrestore`](https://lunarmodules.github.io/luasystem/modules/system.html#autotermrestore).
+  -- @tparam[opt=false] boolean opts.disable_sigint if `true`, the terminal will not send a SIGINT signal
+  -- on Ctrl-C. Disables Ctrl-C, Ctrl-Z, and Ctrl-\, which allows the application to handle them.
   -- @return true
+  -- @within Initialization
   function M.initialize(opts)
     assert(not M.ready(), "terminal already initialized")
 
@@ -131,6 +150,12 @@ do
 
     M._asleep = opts.sleep or sys.sleep
     assert(type(M._asleep) == "function", "invalid opts.sleep function, expected a function, got " .. type(opts.sleep))
+
+    if opts.autotermrestore ~= nil then
+      sys.autotermrestore()
+    end
+
+    sys.detachfds()
 
     termbackup = sys.termbackup()
     if opts.displaybackup then
@@ -152,6 +177,14 @@ do
     -- setup stdin to non-blocking mode
     sys.setnonblock(io.stdin, true)
 
+    if opts.disable_sigint then
+      -- let the app handle ctrl-c, don't send SIGINT
+      sys.tcsetattr(io.stdin, sys.TCSANOW, {
+        lflag = sys.tcgetattr(io.stdin).lflag - sys.L_ISIG,
+      })
+      sys.setconsoleflags(io.stdin, sys.getconsoleflags(io.stdin) - sys.CIF_PROCESSED_INPUT)
+    end
+
     return true
   end
 
@@ -159,18 +192,20 @@ do
 
   --- Shuts down the terminal, restoring the terminal settings.
   -- @return true
+  -- @within Initialization
   function M.shutdown()
     assert(M.ready(), "terminal not initialized")
 
     -- restore all stacks
-    local r,c = cursor.position.get() -- Mac: scroll-region reset changes cursor pos to 1,1, so store it
-    output.write(
-      cursor.shape.stack.pop_seq(math.huge),
-      cursor.visible.stack.pop_seq(math.huge),
-      text.stack.pop_seq(math.huge),
-      scroll.stack.pop_seq(math.huge),
-      cursor.position.set_seq(r,c) -- restore cursor pos
-    )
+    local ok, r,c = pcall(cursor.position.get) -- Mac: scroll-region reset changes cursor pos to 1,1, so store it
+    cursor.shape.stack.pop(math.huge)
+    cursor.visible.stack.pop(math.huge)
+    text.stack.pop(math.huge)
+    scroll.stack.pop(math.huge)
+
+    if ok and r then
+      cursor.position.set(r,c) -- restore cursor pos
+    end
     output.flush()
 
     if termbackup.displaybackup then
@@ -195,36 +230,44 @@ end
 --- Wrap a function in `initialize` and `shutdown` calls.
 -- When an error occurs, and the application exits, the terminal might not be properly shut down.
 -- This function wraps a function in calls to `initialize` and `shutdown`, ensuring the terminal is properly shut down.
--- @tparam[opt] table opts options table, to pass to `initialize`.
+-- If an error is caught, it first shutsdown the terminal and then rethrows the error.
 -- @tparam function main the function to wrap
--- @param ... any parameters to pass to the main function
--- @treturn any the return values of the wrapped function, or nil+err in case of an error
--- @usage local function main(param1, param2)
---   -- your main app functionality here
+-- @tparam[opt] table opts options table, to pass to `initialize`.
+-- @treturn function wrapped function
+-- @within Initialization
+-- @usage
+-- local function main(param1, param2)
 --
---   return true -- return truthy to pass assertion below
+--   -- your main app functionality here
+--   error("oops...")
+--
 -- end
 --
--- local opts = {
+-- main = t.initwrap(main, {
 --   filehandle = io.stderr,
 --   displaybackup = true,
--- }
--- assert(t.initwrap(opts, main, "one", "two")) -- assert to rethrow any error after termimal restore
-function M.initwrap(opts, main, ...)
-  assert(type(main) == "function", "expected main to be a function, got " .. type(main))
-  M.initialize(opts)
+-- })
+--
+-- main("one", "two") -- rethrows any error after termimal restore
+function M.initwrap(main, opts)
+  assert(type(main) == "function", "expected arg#1 to be a function, got " .. type(main))
 
-  local results
-  local ok, err = xpcall(function(...)
-    results = pack(main(...))
-  end, debug.traceback, ...)
+  return function(...)
+    M.initialize(opts)
 
-  M.shutdown()
+    local args = pack(...)
+    local results
+    local ok, err = xpcall(function()
+      results = pack(main(unpack(args)))
+    end, debug.traceback)
 
-  if not ok then
-    return nil, err
+    M.shutdown()
+
+    if not ok then
+      return error(err, 2)
+    end
+    return unpack(results)
   end
-  return unpack(results)
 end
 
 
