@@ -67,7 +67,7 @@ M.size = sys.termsize
 
 --- Returns a string sequence to make the terminal beep.
 -- @treturn string ansi sequence to write to the terminal
-function M.beep_seq()
+function M.bell_seq()
   return "\a"
 end
 
@@ -75,8 +75,8 @@ end
 
 --- Write a sequence to the terminal to make it beep.
 -- @return true
-function M.beep()
-  output.write(M.beep_seq())
+function M.bell()
+  output.write(M.bell_seq())
   return true
 end
 
