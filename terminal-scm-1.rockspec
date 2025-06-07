@@ -56,6 +56,7 @@ build = {
     ["terminal.text.color"] = "src/terminal/text/color.lua",
     ["terminal.text.stack"] = "src/terminal/text/stack.lua",
     ["terminal.text.width"] = "src/terminal/text/width.lua",
+    ["terminal.text.utf8edit"] = "src/terminal/text/utf8edit.lua",
     ["terminal.cli.select"] = "src/terminal/cli/select.lua",
   },
 
