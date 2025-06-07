@@ -26,7 +26,7 @@ description = {
 dependencies = {
   "lua >= 5.1, < 5.5",
   "luasystem >= 0.6.0",
-  "utf8",
+  "utf8 >= 1.3.0",
 }
 
 build = {
