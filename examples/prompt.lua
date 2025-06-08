@@ -1,6 +1,6 @@
+local t = require("terminal")
 local Prompt = require("terminal.cli.prompt")
 
-print("")
 local pr = Prompt {
   prompt = "Enter something: ",
   value = "Hello, 你-好 World 🚀!",
@@ -11,9 +11,11 @@ local pr = Prompt {
 
 local result, status = pr:run()
 
-if result then
-  print("Result (string): '" .. result .. "'")
-  print("Result (bytes):", (result or ""):byte(1, -1))
-else
-  print("Status: " .. status)
-end
+t.initwrap(function ()
+  if result then
+    print("Result (string): '" .. result .. "'")
+    print("Result (bytes):", (result or ""):byte(1, -1))
+  else
+    print("Status: " .. (status or "nil"))
+  end
+end, {})()

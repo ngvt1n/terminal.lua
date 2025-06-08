@@ -107,19 +107,14 @@ end
 -- @treturn string The final input value entered by the user.
 -- @treturn string The exit key that terminated the input loop.
 function Prompt:run()
-  local revert
-  if not t.ready() then
-    t.initialize()
-    revert = true
-  end
 
-  self:draw()
+  local status
 
-  local status = self:handleInput()
-
-  output.print() -- move to new line (we're still on the 'press any key' line)
-
-  if revert then t.shutdown() end
+  t.initwrap(function()
+    self:draw()
+    status = self:handleInput()
+    t.output.print() -- move to new line (we're still on the 'press any key' line)
+  end, {})()
 
   if status == "returned" then
     return tostring(self.value), status
