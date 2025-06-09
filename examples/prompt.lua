@@ -11,7 +11,7 @@ local pr = Prompt {
 
 local result, status = pr:run()
 
-t.initwrap(function ()
+t.initwrap(function () -- on Windows: wrap for utf8 output
   if result then
     print("Result (string): '" .. result .. "'")
     print("Result (bytes):", (result or ""):byte(1, -1))

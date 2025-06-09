@@ -28,8 +28,7 @@ local UTF8EditLine = require("terminal.text.utf8edit").UTF8EditLine
 -- Key bindings
 local keys = t.input.keymap.get_keys()
 local keymap = t.input.keymap.get_keymap({
-  ctrl_c = keys.escape, -- Ctrl+C
-  esc = keys.escape,    -- Esc
+  ["\127"] = "backspace",
 })
 
 local Prompt = utils.class()

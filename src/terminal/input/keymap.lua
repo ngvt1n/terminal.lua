@@ -294,6 +294,7 @@ do
     ["gs"]  = "ctrl_]",
     ["rs"]  = "ctrl_^",
     ["us"]  = "ctrl__",
+    ["del"]  = "ctrl_?",
   }
 
 
