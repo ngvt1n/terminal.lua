@@ -4,6 +4,7 @@
 -- Features: Prompt, UTF8 support, async input, (to be added: secrets, scrolling and wrapping)
 -- The user can confirm their choices by pressing <Enter>
 -- Cancel their choices by pressing <Esc>
+-- NOTE: you MUST `terminal.initialize()` before calling this widget's `:run()`
 -- @classmod cli.Prompt
 -- @usage
 -- local prompt = Prompt {
@@ -15,8 +16,6 @@
 --     fsleep = sys.sleep,
 -- }
 -- local result, exitkey = pr:run()
-
--- todo: use the new keymap -- check cli.select
 
 local t = require("terminal")
 local sys = require("system")
@@ -106,14 +105,11 @@ end
 -- @treturn string The final input value entered by the user.
 -- @treturn string The exit key that terminated the input loop.
 function Prompt:run()
-
   local status
 
-  t.initwrap(function()
-    self:draw()
-    status = self:handleInput()
-    t.output.print() -- move to new line (we're still on the 'press any key' line)
-  end, {})()
+  self:draw()
+  status = self:handleInput()
+  t.output.print() -- move to new line (we're still on the 'press any key' line)
 
   if status == "returned" then
     return tostring(self.value), status

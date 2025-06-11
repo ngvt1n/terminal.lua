@@ -9,9 +9,8 @@ local pr = Prompt {
   cancellable = true,
 }
 
-local result, status = pr:run()
-
 t.initwrap(function () -- on Windows: wrap for utf8 output
+  local result, status = pr:run()
   if result then
     print("Result (string): '" .. result .. "'")
     print("Result (bytes):", (result or ""):byte(1, -1))
