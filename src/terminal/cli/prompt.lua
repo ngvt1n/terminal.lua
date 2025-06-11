@@ -74,8 +74,9 @@ end
 -- @tparam string keytype The type of the key (e.g., "ansi", "control").
 function Prompt:handleInput()
   while true do
-    local _, keyname = self:readKey()
+    local key, keyname = self:readKey()
     if keyname then
+      -- too hacky maybe?
       local editing_handler = self.value[keyname]
       if editing_handler then
         editing_handler(self.value)
@@ -84,7 +85,7 @@ function Prompt:handleInput()
         return "cancelled"
       elseif keyname == keys.enter then
         return "returned"
-      elseif pcall(function() return keys[keyname] end) then -- hacky way to check non-printing characters
+      elseif t.input.keymap.is_printable(key) == false then
         t.bell()
       elseif self.value.ilen >= self.max_length then
         -- if control character
