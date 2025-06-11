@@ -26,11 +26,45 @@ local UTF8EditLine = require("terminal.text.utf8edit").UTF8EditLine
 
 -- Key bindings
 local keys = t.input.keymap.get_keys()
-local keymap = t.input.keymap.get_keymap({
-  ["\127"] = "backspace",
-})
+local keymap = t.input.keymap.get_keymap()
 
 local Prompt = utils.class()
+
+Prompt.keyname2actions = {
+  ["ctrl_?"] = "backspace",
+  ["ctrl_h"] = "backspace",
+  ["left"] = "left",
+  ["right"] = "right",
+  ["up"] = "up",
+  ["down"] = "down",
+  --- emacs keybinding
+  ["ctrl_f"] = "left",
+  ["ctrl_b"] = "right",
+  ["ctrl_a"] = "home",
+  ["ctrl_e"] = "end",
+  ["ctrl_w"] = "backspace_word",
+  ["ctrl_u"] = "backspace_to_start",
+  ["ctrl_d"] = "delete_word",
+  ["ctrl_k"] = "delete_to_end",
+  ["ctrl_l"] = "clear",
+}
+
+Prompt.actions2redraw = utils.make_lookup("actions", {
+  ["backspace"] = true,
+  ["delete"] = true,
+  ["backsapce_word"] = true,
+  ["backsapce_to_start"] = true,
+  ["delete_word"] = true,
+  ["delete_to_end"] = true,
+  ["clear"] = true,
+  --
+  ["left"] = false,
+  ["right"] = false,
+  ["home"] = false,
+  ["up"] = false,
+  ["down"] = false,
+  ["end"] = false,
+})
 
 function Prompt:init(opts)
   self.value = UTF8EditLine(opts.value or "")
@@ -77,19 +111,20 @@ function Prompt:handleInput()
     local key, keyname = self:readKey()
     if keyname then
       -- too hacky maybe?
-      local editing_handler = self.value[keyname]
-      if editing_handler then
-        editing_handler(self.value)
-        self:draw()
+      local action = Prompt.keyname2actions[keyname]
+
+      if action then
+        local handle_action = UTF8EditLine[action]
+        if handle_action then
+          handle_action(self.value)
+        end
       elseif keyname == keys.escape and self.cancellable then
         return "cancelled"
       elseif keyname == keys.enter then
         return "returned"
       elseif t.input.keymap.is_printable(key) == false then
         t.bell()
-      elseif self.value.ilen >= self.max_length then
-        -- if control character
-        -- or if printing character but the length limit is reached :P
+      elseif self.value.ilen >= self.max_length or #keyname ~= 1 then
         t.bell()
       else -- add the character at the current cursor
         self.value:add(keyname)
