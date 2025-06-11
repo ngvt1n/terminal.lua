@@ -23,6 +23,7 @@ local utils = require("terminal.utils")
 local width = require("terminal.text.width")
 local output = require("terminal.output")
 local UTF8EditLine = require("terminal.text.utf8edit").UTF8EditLine
+local utf8 = require("utf8") -- explicitly requires lua-utf8 for Lua < 5.3
 
 -- Key bindings
 local keys = t.input.keymap.get_keys()
@@ -87,11 +88,14 @@ function Prompt:draw(redraw)
   -- write prompt & value
   local value = tostring(self.value)
   output.write(value)
+  output.write(t.clear.eol_seq())
   -- clear remainder of input size
-  output.write(string.rep(" ", self.max_length - self.value.olen))
-  -- move to cursor position
-  t.cursor.position.column(width.utf8swidth(self.prompt) + self.value.ocursor)
   output.flush()
+end
+
+function Prompt:updateCursor(column)
+  -- move to cursor position
+  t.cursor.position.column(column or width.utf8swidth(self.prompt) + self.value.ocursor)
 end
 
 -- Read and normalize key input
@@ -114,21 +118,28 @@ function Prompt:handleInput()
       local action = Prompt.keyname2actions[keyname]
 
       if action then
+        local redraw = Prompt.actions2redraw[action]
         local handle_action = UTF8EditLine[action]
+
         if handle_action then
           handle_action(self.value)
         end
+        if redraw then
+          self:draw(false)
+        end
+        self:updateCursor()
       elseif keyname == keys.escape and self.cancellable then
         return "cancelled"
       elseif keyname == keys.enter then
         return "returned"
       elseif t.input.keymap.is_printable(key) == false then
         t.bell()
-      elseif self.value.ilen >= self.max_length or #keyname ~= 1 then
+      elseif self.value.ilen >= self.max_length or utf8.len(key) ~= 1 then
         t.bell()
       else -- add the character at the current cursor
-        self.value:add(keyname)
-        self:draw()
+        self.value:add(key)
+        self:draw(false)
+        self:updateCursor()
       end
     end
   end
