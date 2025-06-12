@@ -132,6 +132,7 @@ function Prompt:handleInput()
         return "cancelled"
       elseif keyname == keys.enter then
         return "returned"
+      -- TODO: wait for luasystem's new readansi release
       elseif t.input.keymap.is_printable(key) == false then
         t.bell()
       elseif self.value.ilen >= self.max_length or utf8.len(key) ~= 1 then
