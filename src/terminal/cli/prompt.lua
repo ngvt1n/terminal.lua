@@ -89,13 +89,13 @@ Prompt.actions2redraw = utils.make_lookup("actions", {
 function Prompt:init(opts)
   self.prompt = opts.prompt or ""         -- the prompt to display
   local _, columns = t.size()
-  local auto_width = columns - width.utf8swidth(self.prompt) - 3
+  local auto_width = columns - width.utf8swidth(self.prompt) - 2
   self.value = UTF8EditLine({
     value = opts.value,
     word_delimiters = opts.word_delimiters,
     position = opts.position,
     -- viewport_width = opts.viewport_width or auto_width
-    viewport_width = opts.viewport_width or 30
+    viewport_width = opts.viewport_width or auto_width
   })
 end
 
